@@ -46,7 +46,7 @@
   {:else}
     <div class="gallery-grid">
       {#each filteredItems as item (item.pid)}
-        <a href="{siteDomain}/item/{item.pid}/index.html" class="gallery-item">
+        <a href="{siteDomain}item/{item.pid}/index.html" class="gallery-item">
           <div class="image-wrapper">
             {#if item.images && item.images.length > 0}
               <img src={item.images[0]} alt={item.label || item.pid} loading="lazy" />

@@ -8,7 +8,7 @@
         "color": 1,
         "icon": "web-feather"
     },
-    "domain": "https://srsergiorodriguez.github.io/clean-template",
+    "domain": "https://srsergiorodriguez.github.io/mirla-hd",
     "language": "es",
     "spellchecking": false,
     "advanced": {
@@ -178,7 +178,7 @@
         "port": "",
         "server": "",
         "username": "",
-        "password": "",
+        "password": "publii uuid-1772834885096-664786080",
         "askforpassword": false,
         "rejectUnauthorized": true,
         "path": "",
@@ -188,8 +188,8 @@
             "customProvider": false,
             "provider": "aws",
             "endpoint": "",
-            "id": "",
-            "key": "",
+            "id": "publii-s3-id uuid-1772834885096-664786080",
+            "key": "publii-s3-key uuid-1772834885096-664786080",
             "bucket": "",
             "region": "",
             "customRegion": "",
@@ -202,7 +202,7 @@
             "url": "",
             "branch": "",
             "user": "",
-            "password": "",
+            "password": "publii-git-password uuid-1772834885096-664786080",
             "commitAuthor": "",
             "commitEmail": "",
             "commitMessage": "Publii: update content"
@@ -210,7 +210,7 @@
         "github": {
             "server": "api.github.com",
             "user": "srsergiorodriguez",
-            "repo": "clean-template",
+            "repo": "mirla-hd",
             "branch": "gh-pages",
             "token": "publii-gh-token uuid-1772834885096-664786080",
             "parallelOperations": 1,
@@ -221,11 +221,11 @@
             "rejectUnauthorized": true,
             "repo": "",
             "branch": "",
-            "token": ""
+            "token": "publii-gl-token uuid-1772834885096-664786080"
         },
         "netlify": {
-            "id": "",
-            "token": ""
+            "id": "publii-netlify-id uuid-1772834885096-664786080",
+            "token": "publii-netlify-token uuid-1772834885096-664786080"
         },
         "google": {
             "key": "",
@@ -238,5 +238,5 @@
         }
     },
     "theme": "mirlaTheme",
-    "syncDate": 1774960528006
+    "syncDate": 1775018580371
 }

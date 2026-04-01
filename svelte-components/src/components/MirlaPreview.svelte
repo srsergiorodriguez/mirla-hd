@@ -18,7 +18,7 @@
 
 {#if found}
   <div class="mirla-preview-item">
-    <a href="{siteDomain}/item/{pid}/index.html" class="img-link">
+    <a href="{siteDomain}item/{pid}/index.html" class="img-link">
       {#if found.images && found.images[imageIndex]}
         <img 
           src={found.images[imageIndex]} 

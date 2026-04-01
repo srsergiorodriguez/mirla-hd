@@ -16,7 +16,7 @@
     </div>
     <div class="items-grid">
       {#each items as item}
-        <a href="{siteDomain}/item/{item.pid}/index.html" class="item-thumb">
+        <a href="{siteDomain}item/{item.pid}/index.html" class="item-thumb">
           {#if item.images && item.images[0]}
             <img src={item.images[0]} alt={item.label} title={item.label} loading="lazy" />
           {:else}
