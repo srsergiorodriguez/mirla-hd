@@ -81,7 +81,7 @@
         "hiddenPostsListingOrderBy": "created_at",
         "hiddenPostsListingOrder": "DESC",
         "usePageAsFrontpage": false,
-        "pageAsFrontpage": 0,
+        "pageAsFrontpage": 3,
         "feed": {
             "title": "displayName",
             "titleValue": "",
