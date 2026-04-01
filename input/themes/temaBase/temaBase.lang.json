@@ -1,0 +1,42 @@
+{
+   "partials": {
+           
+      "pagination": {
+         "prev": "Anterior",
+         "next": "Siguiente"
+      },
+
+      "sidebar": {
+         "selectedPosts": "Posts seleccionados",
+         "featuredPosts": "Posts recomendados",
+         "authors": "Autores"
+      }
+   },
+
+   "post": {
+      "publishedBy": "Por ",
+      "lastUpdatedDate": "Actualizado en: ",
+      "previousPost": "Anterior",
+      "nextPost": "Siguiente",
+      "relatedPosts": "Relacionados: "
+   },
+
+   "tags": {
+      "tagsPageTitle": "Etiquetas",
+      "description": "Todas las etiquetas",
+      "post": {
+       "1": "Post",
+          "default": "Posts"
+      }
+  },
+
+  "author": {
+    "visitWebsite": "Visitar sitio web"
+  },
+
+   "error": {
+       "404": "Error 404",
+       "message": "La página que buscas parece haberse movido, fue borrada o no existe. Puedes regresar o ir al inicio.",
+       "button": "Ir al inicio"
+   }
+}

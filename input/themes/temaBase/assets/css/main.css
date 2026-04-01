@@ -1,0 +1,443 @@
+:root {
+  /* --- MAIN COLORS --- */
+
+  /* Main color (Buttons, Links, UI...) */
+  /* --pico-primary: #3498db;  */
+
+  /* Hover state */
+  /* --pico-primary-hover: #2980b9; */
+
+  /* Text color inside primary buttons */
+  /* --pico-primary-inverse: #ff0000;     */
+
+  /* Main page background */
+  /* --pico-background-color: #11191f; */
+
+  /* Background for cards/sections */
+  /* --pico-card-background-color: #291a1a; */
+  /* --pico-card-sectioning-background-color: #232c33; */
+
+  --pico-box-shadow: none !important;
+
+  /* --- FONTS --- */
+
+  /* This is selected in the theme's config options, here just for reference */
+  /* --pico-font-size: 16px; */
+
+  /* Main font */
+  /* This is set in the theme's config options, here just for reference */
+  /* --pico-font-family: "Arial", system-ui, -apple-system, sans-serif; */
+
+  /* Main body text color */
+  /* --pico-color: #ed1616; */
+
+  /* --pico-line-height: 1.65; */
+  /* --pico-font-weight: 400; */
+
+  /* --- HEADINGS --- */
+
+  /*  Change to set a particular color for all H1, H2, H3, etc. */
+  --pico-heading-color: var(--pico-color);
+
+  /* Set a font to headings */
+  /* This is set in the theme's config options, here just for reference */
+  /* --pico-font-family-heading: var(--pico-font-family); */
+
+  /* --- LINKS --- */
+
+  --pico-link-color: var(--pico-primary);
+
+  /* --- BORDERS & SPACING --- */
+
+  /* This is set in the theme's config options, here just for reference */
+  /* --pico-border-color: #2d3d4a; */
+
+  /* Subtle borders for inputs and dividers */
+  /* --pico-border-radius: 4px; */
+
+  /* --pico-spacing: 1.25rem; */
+  /* --pico-block-spacing-vertical: var(--pico-spacing); */
+  /* --pico-block-spacing-horizontal: var(--pico-spacing); */
+
+  /* Focus ring width */
+  --pico-outline-width: 10px;
+
+  /* --- PUBLII THEME VARIABLES just for reference, is set in the theme's config --- */
+  /* --main-width: 1100px;
+  --sidebar-width: 300px; */
+}
+
+/* Shoelace's style cohesion */
+:root,
+.sl-theme-light,
+.sl-theme-dark {
+  /* 1. Sync Typography */
+  --sl-font-sans: var(--pico-font-family);
+  --sl-font-serif: var(--pico-font-family-heading);
+  
+  /* 2. Sync Primary Colors using color-mix */
+  /* We map Shoelace's 500/600/700 (standard states) to Pico's primary variables */
+  
+  --sl-color-primary-50:  color-mix(in srgb, var(--pico-primary), white 95%);
+  --sl-color-primary-100: color-mix(in srgb, var(--pico-primary), white 90%);
+  --sl-color-primary-200: color-mix(in srgb, var(--pico-primary), white 80%);
+  --sl-color-primary-300: color-mix(in srgb, var(--pico-primary), white 60%);
+  --sl-color-primary-400: color-mix(in srgb, var(--pico-primary), white 40%);
+  
+  /* The "Base" state is mapped directly to your Pico primary */
+  --sl-color-primary-500: var(--pico-primary); 
+  
+  /* Hover and Focus states are derived from Pico's primary-hover */
+  --sl-color-primary-600: var(--pico-primary-hover);
+  --sl-color-primary-700: color-mix(in srgb, var(--pico-primary-hover), black 20%);
+  --sl-color-primary-800: color-mix(in srgb, var(--pico-primary-hover), black 40%);
+  --sl-color-primary-900: color-mix(in srgb, var(--pico-primary-hover), black 60%);
+
+  /* 3. Sync Neutral Scales (Backgrounds & Borders) */
+  --sl-input-background-color: var(--pico-background-color);
+  --sl-input-border-color: var(--pico-border-color);
+  --sl-input-color: var(--pico-color);
+  
+  /* 4. Sync Border Radii and Spacing */
+  --sl-border-radius-medium: var(--pico-border-radius);
+  --sl-input-border-radius-medium: var(--pico-border-radius);
+  --sl-spacing-medium: var(--pico-spacing);
+
+  /* 5. Sync Shadows & Focus Rings */
+  --sl-focus-ring-color: color-mix(in srgb, var(--pico-primary), transparent 60%);
+  --sl-shadow-x-small: var(--pico-box-shadow);
+}
+
+.sl-theme-dark {
+  --sl-color-primary-50:  color-mix(in srgb, var(--pico-primary), black 95%);
+  --sl-color-primary-100: color-mix(in srgb, var(--pico-primary), black 90%);
+  --sl-color-primary-200: color-mix(in srgb, var(--pico-primary), black 80%);
+  --sl-color-primary-300: color-mix(in srgb, var(--pico-primary), black 60%);
+  --sl-color-primary-400: color-mix(in srgb, var(--pico-primary), black 40%);
+}
+
+/* Hide Shoelace components until they are defined by the JS */
+:not(:defined) {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Allow for a smooth fade-in once they are ready */
+sl-button, sl-input, sl-card {
+  transition: opacity 0.2s ease-in;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--pico-font-family-heading);
+  color: var(--pico-heading-color);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  --sidebar-current-width: var(--sidebar-width);
+
+  /* Grid Layout */
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, var(--main-width)) var(--sidebar-current-width) 1fr;
+  grid-template-areas:  "header header header"
+                        "main sidebar ."
+                        "footer footer footer";
+  grid-gap: 1em;
+
+  min-height: 100vh;
+}
+
+body.no-sidebar {
+  --sidebar-current-width: 0px;
+  grid-gap: 1em 0;
+}
+
+body.no-sidebar aside {
+  display: none;
+}
+
+header {
+  grid-area: header;
+  border-bottom: 1px solid var(--pico-border-color);
+}
+
+main {
+  grid-area: main;
+}
+
+aside {
+  grid-area: sidebar;
+  padding: var(--pico-spacing);
+  background-color: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
+}
+
+footer {
+  grid-area: footer;
+  padding: var(--pico-spacing) 0;
+  border-top: 1px solid var(--pico-border-color);
+  font-size: 0.9rem;
+}
+
+/* Basic Link Overrides */
+a {
+  color: var(--pico-link-color);
+  text-decoration: var(--pico-text-decoration);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--pico-primary-hover);
+}
+
+/* --- PUBLII SPECIFIC CLASSES --- */
+
+/* Menu Implementation */
+.menu {
+  display: flex;
+  flex-direction: row;
+  gap: 3em;
+  justify-content: flex-start; /* This creates the even horizontal distribution */
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--pico-spacing);
+  width: 100%; /* Ensure it takes up the full width of its parent nav */
+}
+
+.menu a {
+  font-weight: 700;
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+.menu a.active {
+  color: var(--pico-heading-color);
+  text-decoration: underline;
+}
+
+/* Images and Media */
+img {
+  height: auto;
+  max-width: 100%;
+  border-radius: var(--pico-border-radius);
+}
+
+.intro-text {
+  text-align: left;
+  grid-area: main;
+  padding: var(--pico-spacing);
+  border-bottom: 1px solid var(--pico-border-color);
+}
+
+/*** CSS classes generated by Publii; a complete list of all CSS classes can be found at https://getpublii.com/dev/default-publii-classes-for-using-with-css/ ***/
+
+/* Text alignment */
+.align-left {
+  text-align: left;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-justify {
+  text-align: justify;
+}
+
+/* Post images & Figures */
+/* Publii wraps images in <figure> tags. We ensure they respect your Pico spacing. */
+.post__image--left {
+  float: left;
+  margin: 0 var(--pico-spacing) var(--pico-spacing) 0;
+  max-width: 50%;
+}
+
+.post__image--right {
+  float: right;
+  margin: 0 0 var(--pico-spacing) var(--pico-spacing);
+  max-width: 50%;
+}
+
+.post__image--center {
+  display: block;
+  margin: var(--pico-spacing) auto;
+  text-align: center;
+}
+
+.post__image--wide,
+.post__image--full {
+  width: 100%;
+  height: auto;
+  margin: var(--pico-spacing) 0;
+}
+
+/* Captions */
+figcaption {
+  font-size: 0.85em;
+  color: var(--pico-muted-color);
+  /* Uses Pico's secondary text color */
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Multimedia */
+.post__video,
+.post__iframe {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  margin: var(--pico-spacing) 0;
+}
+
+.post__video iframe,
+.post__video object,
+.post__video embed,
+.post__iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--pico-border-radius);
+}
+
+/* Table of Contents */
+.post__toc {
+  background: var(--pico-card-background-color);
+  border: 1px solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--pico-spacing);
+  margin-bottom: var(--pico-spacing);
+}
+
+.post__toc h3 {
+  font-size: 1.1rem;
+  margin-top: 0;
+}
+
+/* Separators */
+hr {
+  border: 0;
+  border-top: 1px solid var(--pico-border-color);
+  margin: calc(var(--pico-spacing) * 2) 0;
+}
+
+.separator--dot {
+  border: 0;
+  text-align: center;
+}
+
+.separator--dot:after {
+  content: "···";
+  letter-spacing: 1rem;
+  font-size: 1.5rem;
+  color: var(--pico-muted-color);
+}
+
+/* Gallery (Inspired by Publii Simple Theme) */
+.gallery-wrapper {
+  margin: var(--pico-spacing) 0;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--pico-spacing) / 2);
+}
+
+.gallery__item {
+  position: relative;
+  flex: 1 0 22%;
+  /* 4 columns by default */
+  min-width: 200px;
+}
+
+.gallery__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery__item:hover img {
+  transform: scale(1.02);
+}
+
+/* Support for wide galleries inside the main column */
+.gallery-wrapper--wide,
+.gallery-wrapper--full {
+  margin-left: -5%;
+  margin-right: -5%;
+  width: 110%;
+}
+
+/* Menu logic for nested items */
+.has-submenu {
+  position: relative;
+}
+
+.submenu {
+  display: none;
+  /* Hidden by default */
+  position: absolute;
+  background: var(--pico-card-background-color);
+  border: 1px solid var(--pico-border-color);
+  padding: 0.5rem;
+  z-index: 10;
+}
+
+.has-submenu:hover>.submenu {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  body {
+    /* Stack everything in one column that takes the full width */
+    grid-template-columns: 1fr;
+    
+    /* Redefine areas to stack vertically */
+    grid-template-areas: 
+      "header"
+      "main"
+      "sidebar"
+      "footer";
+    
+    /* Optional: reduce the gap for smaller screens */
+    grid-gap: 1.5em;
+    padding: 0 1rem; /* Prevents text from touching the screen edges */
+  }
+
+  /* Ensure the sidebar takes full width on mobile */
+  aside {
+    width: 100%;
+    margin-top: 1em;
+  }
+
+  .menu {
+    flex-direction: column; /* Stack links vertically  */
+    align-items: flex-start; /* Align them to the left  */
+    gap: 1rem; /* Reduce the gap so it doesn't eat up vertical space  */
+    padding: 1rem var(--pico-spacing); /* Add some breathing room  */
+  }
+
+  .menu li {
+    width: 100%; /* Ensure the clickable area spans the width  */
+    border-bottom: 1px solid var(--pico-border-color); /* Subtle separators  */
+  }
+
+  .menu li:last-child {
+    border-bottom: none; /* Clean up the last item  */
+  }
+}

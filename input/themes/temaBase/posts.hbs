@@ -1,0 +1,18 @@
+{{! This file renders a front page with a list of the latest posts }}
+{{> head}}
+{{> navbar}}
+<main>
+    <h1>Posts</h1>
+    {{! loop that generates a list of posts }}
+    {{#each posts}}
+        {{> postPreview}}
+    {{/each}}
+    {{! /loop that generates list of posts }}
+
+    {{> pagination}}
+</main>
+<aside>
+    {{> sidebar}}
+</aside>
+
+{{> footer}}

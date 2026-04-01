@@ -1,0 +1,189 @@
+{{! Post page; this file renders a single post and loads all the content}}
+{{> head}}
+{{> navbar}}
+<main>
+
+   {{! injects code via a Custom HTML tool - as defined in the config.json file in the "renderer" section }}
+   {{#if @customHTML.beforePost}}
+      <div id="custom-html-before-post">
+         {{{@customHTML.beforePost}}}
+      </div>
+   {{/if}}
+   {{! /injects code via a Custom HTML tool }}
+
+   {{! indicates the post's context}}
+   {{#post}}
+      <article>
+         <header>
+
+            {{! post title }}
+            <h1>
+               {{title}}
+            </h1>
+            {{! /post title }}
+
+            <div class="author-info">
+               {{! post author }}
+               {{ translate 'post.publishedBy' }}
+               {{#author}}
+                  <a href="{{url}}" rel="author" title="{{name}}">{{name}}</a>
+               {{/author}}
+               {{! /post author }}
+            </div>
+
+            <div class="main-tag">
+               {{! main tag - if not selected, the first tag in the list of all tags will be displayed }}
+               {{#if mainTag}}
+                  <a href="{{ mainTag.url }}" class="post__maintag">
+                     {{mainTag.name}}
+                  </a>
+               {{/if}}
+               {{! /main tag }}
+            </div>
+
+            {{! post creation date }}
+            {{!-- <time datetime="{{date createdAt 'YYYY-MM-DDTHH:mm'}}"> --}}
+            <time datetime="{{date createdAt 'YYYY'}}">
+               {{date createdAt "YYYY/MM/DD"}}
+            </time>
+            {{! /post creation date }}
+
+            {{! post modification date }}
+            {{#if modifiedAt}}
+               <small>
+                  {{ translate 'post.lastUpdatedDate' }}
+                  <time datetime="{{date modifiedAt 'YYYY-MM-DDTHH:mm'}}">
+                     {{date modifiedAt "YYYY/MM/DD"}}
+                  </time>   
+               </small>
+            {{/if}}
+            {{! /post modification date }}
+
+         </header>
+
+         {{! featured image }}
+         {{#featuredImage}}
+            {{! check if an image exists }}
+            {{#if url}}
+               <figure id="featured-image">
+                  <img
+                     src="{{url}}"
+                     {{! checks if the Responsive Images option (located in Site Settings -> Website Speed) is enabled  }}
+                     {{#if @config.site.responsiveImages}}
+                        {{responsiveImageAttributes 'featuredImage' srcset sizes}}
+                     {{/if}}
+                     {{! generates a native loading attribute; if the Media Lazy Load option (located in Site Settings -> Website Speed) is disabled, the loading attribute is not generated }}
+                     {{ lazyload "eager" }}
+                     height="{{height}}"
+                     width="{{width}}"
+                     alt="{{alt}}">
+                  {{! checks if the caption or credits exist }}
+                  {{#checkIfAny caption credits}}
+                     <figcaption>
+                        {{caption}}
+                        {{credits}}
+                     </figcaption>
+                  {{/checkIfAny}}
+                  {{! /checks if the caption or credits exist }}
+               </figure>
+            {{/if}}
+            {{! /check if an image exists }}
+         {{/featuredImage}}
+         {{! /featured image }}
+
+         {{! post body }}
+         <div id="post-entry">
+            {{{text}}}
+         </div>
+         {{! /post body }}
+
+         {{! previous & next post }}
+         {{! checks if there are any posts besides the current one; including ../ segment on a path, we change the post context into the parent context }}
+         {{#checkIfAny ../previousPost ../nextPost}}
+            <nav id="post-navigation">
+               {{#../previousPost}}
+                  <a href="{{url}}" rel="prev">
+                     &larr; {{ translate 'post.previousPost' }}
+                     ({{title}})
+                  </a>
+               {{/../previousPost}}
+
+               {{#../nextPost}}
+                  <a href="{{url}}" rel="next">
+                     {{ translate 'post.nextPost' }}
+                     ({{title}}) &rarr;
+                  </a>
+               {{/../nextPost}}
+            </nav>
+         {{/checkIfAny}}
+         {{! /checks if there are any posts besides the current one }}
+         {{! /previous & next post }}
+
+         <br/>
+
+         {{! related posts - defined in config.json file in the "renderer" section }}
+         {{! checks if there is any related post; including ../ segment on a path, we change the post context into the parent context }}
+         {{#if ../relatedPosts}}
+            <div id="related-posts">
+               <h3>
+                  {{ translate 'post.relatedPosts' }}
+               </h3>
+               <div>
+
+                  {{! loop that generates a list of related posts}}
+                  {{#each ../relatedPosts}}
+                     <section>
+                        {{#featuredImage}}
+                           {{#if url}}
+                              <a href="{{../url}}" >
+                                 <img
+                                    src="{{url}}"
+                                    {{#if @config.site.responsiveImages}}
+                                       {{responsiveImageAttributes 'featuredImage' srcset sizes}}
+                                    {{/if}}
+                                    {{ lazyload "lazy" }}
+                                    height="{{height}}"
+                                    width="{{width}}"
+                                    alt="{{alt}}">
+                              </a>
+                           {{/if}}
+                        {{/featuredImage}}
+
+                        <h4>
+                           <a href="{{url}}">{{title}}</a>
+                        </h4>
+
+                        <p>{{{ excerpt }}}</p>
+
+                     </section>
+                  {{/each}}
+                  {{! /loop that generates a list of related posts}}
+
+               </div>
+            </div>
+         {{/if}}
+         {{! /check if there is any related post }}
+         {{! /related posts }}
+
+      </article>
+   {{/post}}
+   {{! /indicates the post's context}}
+
+   {{! display comments plugin: it requires the "customComments" flag to be enabled in the "supportedFeatures" section of the config.json file}}
+      {{{@commentsCustomCode}}}
+   {{! /display comments plugin}}
+
+   {{! code injection by a Custom HTML tool - defined in config.json file in the renderer section}}
+   {{#if @customHTML.afterPost}}
+      <div id="custom-html-after-post">
+         {{{@customHTML.afterPost}}}
+      </div>
+   {{/if}}
+   {{! injects code via a Custom HTML tool }}
+
+</main>
+{{!-- <aside>
+   {{> sidebar}}
+</aside> --}}
+
+{{> footer}}

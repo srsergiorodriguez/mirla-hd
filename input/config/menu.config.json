@@ -1,0 +1,52 @@
+[
+    {
+        "name": "main-menu",
+        "position": "mainMenu",
+        "items": [
+            {
+                "id": 1774733597337,
+                "label": "Tour",
+                "title": "",
+                "type": "page",
+                "target": "_self",
+                "rel": "",
+                "link": 8,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            },
+            {
+                "id": 1774732830054,
+                "label": "Colección",
+                "title": "",
+                "type": "page",
+                "target": "_self",
+                "rel": "",
+                "link": 7,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            }
+        ],
+        "maxLevels": "-1"
+    },
+    {
+        "name": "footer-menu",
+        "position": "footerMenu",
+        "items": [
+            {
+                "id": 1772893712025,
+                "label": "Test page",
+                "title": "",
+                "type": "page",
+                "target": "_self",
+                "rel": "",
+                "link": 4,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            }
+        ],
+        "maxLevels": "1"
+    }
+]

@@ -1,0 +1,288 @@
+/* ==========================================
+   Mirla Web Component Editor Placeholders
+   ========================================== */
+
+body#tinymce mirla-preview {
+  display: block !important;
+  min-height: 60px !important;
+  padding: 20px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #a0a0a0;
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-preview::before {
+  content: "🖼️ Mirla Preview | PID: " attr(pid);
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+body#tinymce mirla-preview[title]::after {
+  content: "Title: " attr(title);
+  display: block;
+  font-size: 0.9em;
+  color: #888;
+}
+
+body#tinymce mirla-barchart {
+  display: block !important;
+  min-height: 60px !important;
+  padding: 20px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #4a90e2; /* Blue dashed border for charts */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-barchart::before {
+  content: "📊 Mirla Bar Chart | Key: " attr(key);
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+body#tinymce mirla-tree {
+  display: block !important;
+  min-height: 60px !important;
+  padding: 20px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #4a90e2;
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+}
+
+body#tinymce mirla-tree::before {
+  content: "🌳 Mirla Tree Graph | Hierarchy: " attr(keys);
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+body#tinymce mirla-timeline {
+  display: block !important;
+  min-height: 60px !important;
+  padding: 20px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #4a90e2;
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+}
+
+body#tinymce mirla-timeline::before {
+  content: "🕒 Mirla Timeline | Date Key: " attr(dateKey);
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+body#tinymce mirla-network {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #4a90e2; /* Blue dashed border for consistency with other viz */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-network::before {
+  content: "🕸️ Mirla Network Graph";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-network::after {
+  content: "Connection: " attr(sourceKey) " ↔ " attr(targetKey);
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+body#tinymce mirla-gallery {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #ffcc00; /* Yellow for galleries */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-gallery::before {
+  content: "🖼️ Mirla Inline Gallery";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-gallery::after {
+  content: "Showing: " attr(key) " = " attr(value);
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+body#tinymce mirla-compare {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #9b19f5;
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-compare::before {
+  content: "↔️ Mirla Comparison Slider";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-compare::after {
+  content: "Comparing: " attr(pid1) " vs. " attr(pid2);
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+body#tinymce mirla-map {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #00bfa0; /* Teal for maps */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-map::before {
+  content: "🗺️ Mirla Geographic Map";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-map::after {
+  content: "Plotting coordinates using key: " attr(coordkey);
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+body#tinymce mirla-waffle {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #dc0ab4; /* Magenta for the waffle */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-waffle::before {
+  content: "🧇 Mirla Waffle Chart";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-waffle::after {
+  content: "Grouping data by key: " attr(key);
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+body#tinymce mirla-table {
+  display: block !important;
+  min-height: 80px !important;
+  padding: 25px;
+  margin: 1.5em 0;
+  background-color: #f4f4f4;
+  border: 2px dashed #4a90e2; /* Blue for data tables */
+  border-radius: 6px;
+  text-align: center;
+  font-family: monospace;
+  color: #555;
+  cursor: pointer;
+}
+
+body#tinymce mirla-table::before {
+  content: "📊 Mirla Metadata Table";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+body#tinymce mirla-table::after {
+  content: "Searchable, sortable, and downloadable CSV metadata grid.";
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 5px;
+}

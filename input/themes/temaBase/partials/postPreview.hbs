@@ -1,0 +1,68 @@
+<article>
+
+  {{! featured image }}
+  {{#featuredImage}}
+      {{! checks if an image exists }}
+      {{#if url}}
+          <figure>
+              <img
+                  src="{{url}}"
+                  {{! checks if the Responsive Images option (located in Site Settings -> Website Speed) is enabled  }}
+                  {{#if @config.site.responsiveImages}}
+                      {{responsiveImageAttributes 'featuredImage' srcset sizes}}
+                  {{/if}}
+                  {{! generates a native loading attribute; if the Media Lazy Load option (located in Site Settings -> Website Speed) is disabled, the loading attribute is not generated  }}
+                  {{lazyload "lazy"}}
+                  height="{{height}}"
+                  width="{{width}}"
+                  alt="{{alt}}">
+
+                  {{! checks if a caption and credits exist  }}
+                  {{#checkIfAny caption credits}}
+                      <figcaption>
+                          {{caption}}
+                          {{credits}}
+                      </figcaption>                      
+                  {{/checkIfAny}}
+                  {{! /checks if a caption and credits exist  }}
+
+            </figure>
+      {{/if}}
+      {{! /checks if an image exists }}
+  {{/featuredImage}}
+  {{! /featured image }}
+
+  {{! post title }}
+  <h2>
+      <a href="{{url}}">{{title}}</a>
+  </h2>
+  {{! /post title }}
+
+  {{! post creation date }}
+  {{!-- <time datetime="{{date createdAt 'YYYY-MM-DDTHH:mm'}}"> --}}
+  <time datetime="{{date createdAt 'YYYY-MM-DDTHH:mm'}}"></time>
+      {{date createdAt 'DD/MM/YY'}}
+  </time>
+  {{! /post creation date }}
+
+  {{! post author }}
+  {{#author}}
+      <a href="{{url}}">{{name}}</a>
+  {{/author}}
+  {{! /post author }}
+
+  {{! main tag - if no main tag is selected, then the first tag in the list of all tags will be used }}
+  {{#if mainTag}}
+      <a href="{{mainTag.url}}">{{mainTag.name}}</a>
+  {{/if}}
+  {{! /main tag }}
+
+  {{! post excerpt - the Custom excerpt is generated when the Read More button is used when editing a post }}
+  {{#if hasCustomExcerpt}}
+      {{{ excerpt }}}
+  {{else}}
+      <p>{{{ excerpt }}}</p>
+  {{/if}}
+  {{! /post excerpt }}
+
+</article>
