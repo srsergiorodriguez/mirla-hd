@@ -1,0 +1,37 @@
+{
+  "name": "Mirla Collection Generator",
+  "description": "Generates a static digital collection with Svelte.",
+  "license": "MIT",
+  "author": "Sergio Rodríguez Gómez",
+  "version": "1.0.0",
+  "scope": "site",
+  "minimumPubliiVersion": "0.40.0",
+  "usePluginSettingsView": false,
+  "config": [
+    {
+      "name": "templatePageId",
+      "label": "Item Template Page",
+      "group": "Collection Settings",
+      "type": "pages-dropdown",
+      "value": "",
+      "multiple": false,
+      "note": "Select the published Publii page to use as the visual mold for individual items."
+    },
+    {
+      "name": "excludedMetadata",
+      "label": "Excluded Metadata",
+      "group": "Collection Settings",
+      "type": "text",
+      "value": "pid,label",
+      "note": "Comma-separated list of attributes to hide from the item page metadata table (e.g., pid, latlong)."
+    },
+    {
+      "name": "galleryFilters",
+      "label": "Gallery Filters",
+      "group": "Collection Settings",
+      "type": "text",
+      "value": "",
+      "note": "Comma-separated list of attributes to use as dropdown filters in the gallery index (e.g., Category, Year)."
+    }
+  ]
+}

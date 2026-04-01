@@ -1,0 +1,40 @@
+name: Build and Release Mirla HD
+
+on:
+  # Triggers when you push a tag (e.g., v1.0.0)
+  push:
+    tags:
+      - 'v*'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Zip Mirla Theme
+        run: |
+          cd "input/themes/mirlaTheme"
+          zip -r "${{ github.workspace }}/mirlaTheme.zip" ./*
+
+      - name: Zip Mirla Plugin
+        run: |
+          cd "mirlaPlugin"
+          zip -r "${{ github.workspace }}/mirlaPlugin.zip" ./*
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            mirlaTheme.zip
+            mirlaPlugin.zip
+          # If triggered manually, it uses 'manual-build' as the tag name
+          tag_name: ${{ github.ref_name || 'manual-build' }}
+          name: Release ${{ github.ref_name || 'Manual Build' }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
