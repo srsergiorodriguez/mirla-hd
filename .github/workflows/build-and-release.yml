@@ -1,12 +1,13 @@
 name: Build and Release Mirla HD
 
 on:
-  # Triggers when you push a tag (e.g., v1.0.0)
   push:
     tags:
       - 'v*'
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
@@ -26,15 +27,26 @@ jobs:
           cd "mirlaPlugin"
           zip -r "${{ github.workspace }}/mirlaPlugin.zip" ./*
 
+      # This ensures manual runs get the 'manual-build' tag instead of 'main'
+      - name: Set Release Variables
+        id: vars
+        run: |
+          if [ "${{ github.ref_type }}" == "tag" ]; then
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "RELEASE_NAME=Release ${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=manual-build" >> $GITHUB_ENV
+            echo "RELEASE_NAME=Manual Build" >> $GITHUB_ENV
+          fi
+
       - name: Create or Update Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             mirlaTheme.zip
             mirlaPlugin.zip
-          # If triggered manually, it uses 'manual-build' as the tag name
-          tag_name: ${{ github.ref_name || 'manual-build' }}
-          name: Release ${{ github.ref_name || 'Manual Build' }}
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.RELEASE_NAME }}
           draft: false
           prerelease: false
           generate_release_notes: true
