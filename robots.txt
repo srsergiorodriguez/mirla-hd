@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://srsergiorodriguez.github.io/mirla-hd/sitemap.xml
