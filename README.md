@@ -6,6 +6,25 @@ Mirla es un sistema diseñado para transformar sitios web estáticos (creados co
 
 Sigue esta guía para instalar el *tema*, estructurar los datos de tu colección, configurar el *plugin* y usar los componentes interactivos personalizados de Mirla en tus páginas. Para lograr todo esto debes tener Publii instalado previamente y debes haber creado un sitio al que integrarás el sistema de Mirla. Puedes construir el sitio web con normalidad e incluir menús, páginas, posts, autores, etc. de la forma convencional en la que se trabaja en Publii.
 
+- [Mirla](#mirla)
+  - [Instalar el tema](#instalar-el-tema)
+  - [Colecciones digitales](#colecciones-digitales)
+    - [1. Preparar los archivos de tu colección](#1-preparar-los-archivos-de-tu-colección)
+      - [A. `Protocol.csv`](#a-protocolcsv)
+      - [B. `Metadata.csv`](#b-metadatacsv)
+      - [C. La carpeta de imágenes (`Images`)](#c-la-carpeta-de-imágenes-images)
+      - [D. Otros medios](#d-otros-medios)
+    - [2. Instalar y configurar el plugin](#2-instalar-y-configurar-el-plugin)
+      - [Instalación](#instalación)
+      - [Crear la plantilla de ítem](#crear-la-plantilla-de-ítem)
+      - [Configurar el plugin](#configurar-el-plugin)
+    - [3. Uso de los componentes interactivos de Mirla](#3-uso-de-los-componentes-interactivos-de-mirla)
+      - [Visualizaciones de Datos](#visualizaciones-de-datos)
+      - [Componentes narrativos](#componentes-narrativos)
+      - [Componentes de gestión de datos](#componentes-de-gestión-de-datos)
+    - [Solución de problemas comunes](#solución-de-problemas-comunes)
+  - [Publicaciones crossmedia](#publicaciones-crossmedia)
+
 ---
 
 ## Instalar el tema
