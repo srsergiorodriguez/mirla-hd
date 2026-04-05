@@ -13,7 +13,7 @@ pais,text
 conseguido,text
 tipo_principal,text
 nota,text
-medio_impresion,text
+medio_impresion,ref:Tecnica
 intervencion_manual,text
 portada_color,text
 portada_especial,text

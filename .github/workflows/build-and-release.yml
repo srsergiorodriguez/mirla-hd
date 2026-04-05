@@ -47,6 +47,12 @@ jobs:
             mirlaPlugin.zip
           tag_name: ${{ env.TAG_NAME }}
           name: ${{ env.RELEASE_NAME }}
+          body: |
+            ### 📦 Installation Files
+            To use this environment, please download both **`mirlaTheme.zip`** and **`mirlaPlugin.zip`** from the Assets section below.
+            
+            ### 📖 Documentation
+            For complete installation instructions, data structuring guidelines, and a list of interactive components, please check the [main repository README](../../).
           draft: false
           prerelease: false
           generate_release_notes: true

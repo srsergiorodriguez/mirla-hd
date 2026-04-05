@@ -442,7 +442,6 @@
     "pageTemplates": {
         "print": "Printable Page Template",
         "item": "Collection Item Template",
-        "index": "Collection Index Template",
         "interactive": "Collection Interactive Template"
     },
     "postTemplates": {

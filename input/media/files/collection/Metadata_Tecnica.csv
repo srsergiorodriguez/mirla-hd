@@ -1,0 +1,6 @@
+pid,label,Descripción
+tec-offset,Offset,Sistema de impresión que usa placas de metal para transferir la tinta al papel. Ideal para grandes tirajes con alta calidad.
+tec-digital,Digital,Impresión directa desde un archivo digital usando impresoras láser o de inyección de tinta. Ideal para tirajes cortos y bajo demanda.
+tec-fotocopia,Fotocopia,Reproducción económica basada en tecnología xerográfica (tóner). Muy popular en la cultura fanzinera por su bajo costo y accesibilidad.
+tec-risografia,Risografía,"Sistema de impresión similar a la serigrafía mecanizada. Conocida por sus colores vibrantes, tintas a base de soya y texturas únicas."
+tec-tipos-moviles,Tipos móviles,Impresión tipográfica tradicional que utiliza letras en relieve presionadas contra el papel. Deja una textura táctil profunda.
