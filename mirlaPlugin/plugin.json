@@ -24,14 +24,6 @@
       "type": "text",
       "value": "pid,label",
       "note": "Comma-separated list of attributes to hide from the item page metadata table (e.g., pid, latlong)."
-    },
-    {
-      "name": "galleryFilters",
-      "label": "Gallery Filters",
-      "group": "Collection Settings",
-      "type": "text",
-      "value": "",
-      "note": "Comma-separated list of attributes to use as dropdown filters in the gallery index (e.g., Category, Year)."
     }
   ]
 }

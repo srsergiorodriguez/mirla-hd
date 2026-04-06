@@ -4,6 +4,18 @@
         "position": "mainMenu",
         "items": [
             {
+                "id": 1775435541720,
+                "label": "Inicio",
+                "title": "",
+                "type": "frontpage",
+                "target": "_self",
+                "rel": "",
+                "link": "empty",
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            },
+            {
                 "id": 1774733597337,
                 "label": "Tour",
                 "title": "",
@@ -23,6 +35,18 @@
                 "target": "_self",
                 "rel": "",
                 "link": 7,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            },
+            {
+                "id": 1775435599789,
+                "label": "Repositorio",
+                "title": "",
+                "type": "external",
+                "target": "_blank",
+                "rel": "",
+                "link": "https://github.com/srsergiorodriguez/mirla-hd",
                 "cssClass": "",
                 "isHidden": false,
                 "items": []

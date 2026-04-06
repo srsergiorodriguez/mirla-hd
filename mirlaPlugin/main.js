@@ -30,7 +30,6 @@ class MirlaCollectionGenerator {
       if (!fs.existsSync(pluginIconsDest)) {
         fs.mkdirSync(pluginIconsDest, { recursive: true });
       }
-      // Read all icons and copy them to the public output directory
       const icons = fs.readdirSync(pluginIconsSrc);
       icons.forEach(icon => {
         const srcFile = path.join(pluginIconsSrc, icon);
@@ -48,212 +47,267 @@ class MirlaCollectionGenerator {
     // 1. FILE VERIFICATION
     // ==========================================
     const collectionInputPath = path.join(inputDir, 'media', 'files', 'collection');
-    const metadataPath = path.join(collectionInputPath, 'Metadata.csv');
-    const protocolPath = path.join(collectionInputPath, 'Protocol.csv');
     const imagesInputPath = path.join(collectionInputPath, 'images');
 
-    // Load the HTML template from the plugin directory
     const injectionTemplatePath = path.join(__dirname, 'item-template.html');
     if (!fs.existsSync(injectionTemplatePath)) {
       throw new Error(`[Mirla Plugin] FATAL ERROR: item-template.html not found in plugin directory.`);
     }
     const itemTemplateRaw = fs.readFileSync(injectionTemplatePath, 'utf8');
 
-    if (!fs.existsSync(metadataPath)) {
-      console.log(`[Mirla Plugin] FATAL ERROR: Metadata.csv not found at ${metadataPath}`);
-      return;
-    }
-    if (!fs.existsSync(protocolPath)) {
-      console.log(`[Mirla Plugin] FATAL ERROR: Protocol.csv not found at ${protocolPath}`);
-      return;
+    if (!fs.existsSync(collectionInputPath)) {
+       throw new Error(`[Mirla Plugin] FATAL ERROR: Collection folder not found at ${collectionInputPath}`);
     }
 
-    // ==========================================
-    // 2. PROTOCOL PARSING
-    // ==========================================
-    const protocolRaw = fs.readFileSync(protocolPath, 'utf8');
-    const protocolParsed = Papa.parse(protocolRaw, { header: true, skipEmptyLines: true });
+    // Identify the main table files vs secondary tables
+    let mainProtocolPath = null;
+    let mainMetadataPath = null;
+    let secondaryProtocolFiles = [];
+    let secondaryMetadataFiles = [];
 
-    if (protocolParsed.errors.length > 0) {
-      console.log("[Mirla Plugin] FATAL ERROR: Protocol.csv Parsing Errors: " + JSON.stringify(protocolParsed.errors));
-      return;
-    }
+    const filesInCollection = fs.readdirSync(collectionInputPath);
 
-    // Map the attributes to their types based on Protocol.csv
-    const protocolMap = {};
-    protocolParsed.data.forEach(row => {
-      if (row.Attribute && row.Type) {
-        protocolMap[row.Attribute.trim()] = row.Type.trim().toLowerCase();
+    filesInCollection.forEach(file => {
+      if (file.toLowerCase() === 'protocol.csv') {
+        mainProtocolPath = path.join(collectionInputPath, file);
+      } else if (file.toLowerCase() === 'metadata.csv') {
+        mainMetadataPath = path.join(collectionInputPath, file);
+      } else if (file.toLowerCase().startsWith('protocol_') && file.toLowerCase().endsWith('.csv')) {
+        secondaryProtocolFiles.push(path.join(collectionInputPath, file));
+      } else if (file.toLowerCase().startsWith('metadata_') && file.toLowerCase().endsWith('.csv')) {
+        secondaryMetadataFiles.push(path.join(collectionInputPath, file));
       }
     });
-    
-    console.log("[Mirla Plugin] Loaded Protocol Schema:", JSON.stringify(protocolMap));
+
+    if (!mainProtocolPath || !mainMetadataPath) {
+      throw new Error("[Mirla Plugin] FATAL ERROR: Main Protocol.csv or Metadata.csv is missing.");
+    }
 
     // ==========================================
-    // 3. METADATA PARSING
+    // 2. PARSE ALL PROTOCOLS
     // ==========================================
-    const csvRaw = fs.readFileSync(metadataPath, 'utf8');
-    const parsed = Papa.parse(csvRaw, {
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: true // Converts numbers automatically
+    const parseProtocol = (filePath) => {
+      const raw = fs.readFileSync(filePath, 'utf8');
+      const parsed = Papa.parse(raw, { header: true, skipEmptyLines: true });
+      if (parsed.errors.length > 0) {
+        console.log(`[Mirla Plugin] ERROR parsing Protocol: ${filePath} - ` + JSON.stringify(parsed.errors));
+        return {};
+      }
+      const map = {};
+      parsed.data.forEach(row => {
+        if (row.Attribute && row.Type) {
+          map[row.Attribute.trim()] = row.Type.trim().toLowerCase();
+        }
+      });
+      return map;
+    };
+
+    // Main Protocol
+    const mainProtocolMap = parseProtocol(mainProtocolPath);
+    console.log("[Mirla Plugin] Loaded Main Protocol Schema.");
+
+    // Secondary Protocols
+    const secondaryProtocolMaps = {};
+    secondaryProtocolFiles.forEach(file => {
+      const fileName = path.basename(file, '.csv');
+      const suffix = fileName.substring(9); // Removes 'Protocol_'
+      secondaryProtocolMaps[suffix] = parseProtocol(file);
     });
 
-    if (parsed.errors.length > 0) {
-      console.log("[Mirla Plugin] FATAL ERROR: Metadata.csv Parsing Errors: " + JSON.stringify(parsed.errors));
-      return;
-    }
-
-    const collectionData = parsed.data;
-
-    // ==========================================
-    // 4. BATCH VALIDATION (FATAL ERRORS)
-    // ==========================================
-    if (collectionData.length === 0) {
-      throw new Error("[Mirla Plugin] FATAL ERROR: Metadata is empty");
-    }
-
-    if (!('pid' in collectionData[0])) {
-      throw new Error("[Mirla Plugin] FATAL ERROR: Metadata lacks 'pid' column");
-    }
-
-    // Check for unique PIDs
-    const allPids = collectionData.map(d => d.pid).filter(p => p !== undefined && p !== null && p !== '');
-    const uniquePids = new Set(allPids);
-    if (uniquePids.size !== allPids.length) {
-      throw new Error("[Mirla Plugin] FATAL ERROR: There are duplicate pids");
-    }
+    // Create a unified master protocol for the JSON output 
+    // This allows components like mirla-table to see all possible columns
+    const unifiedProtocolMap = { ...mainProtocolMap };
+    Object.values(secondaryProtocolMaps).forEach(secondaryMap => {
+        Object.assign(unifiedProtocolMap, secondaryMap);
+    });
 
     // ==========================================
-    // 5. ROW VALIDATION & IMAGE PROCESSING
+    // 3. PARSE ALL METADATA
     // ==========================================
-    let processedCount = 0;
-    let errorCount = 0;
+    const parseMetadata = (filePath) => {
+      const raw = fs.readFileSync(filePath, 'utf8');
+      const parsed = Papa.parse(raw, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true
+      });
+      if (parsed.errors.length > 0) {
+        console.log(`[Mirla Plugin] ERROR parsing Metadata: ${filePath} - ` + JSON.stringify(parsed.errors));
+        return [];
+      }
+      return parsed.data;
+    };
+
+    // Main Metadata
+    let collectionData = parseMetadata(mainMetadataPath);
+    collectionData = collectionData.filter(item => {
+      if (!item.pid) {
+        console.log(`[Mirla Plugin] WARNING: Skipping row without pid in main Metadata.csv`);
+        return false;
+      }
+      return true;
+    });
+
+    // Secondary Metadata Tables
+    const secondaryTablesData = {};
+    secondaryMetadataFiles.forEach(file => {
+      const fileName = path.basename(file, '.csv');
+      const suffix = fileName.substring(9); // Removes 'Metadata_'
+      
+      const rawData = parseMetadata(file);
+      const dictionary = {};
+      rawData.forEach(item => {
+        if (item.pid) {
+          dictionary[item.pid.toString().trim()] = item;
+        }
+      });
+      
+      secondaryTablesData[suffix] = dictionary;
+      console.log(`[Mirla Plugin] Loaded Secondary Table: ${suffix} (${Object.keys(dictionary).length} items)`);
+    });
+
+    const mainPids = collectionData.map(d => d.pid.toString().trim());
+    const uniqueMainPids = new Set(mainPids);
+    if (uniqueMainPids.size !== mainPids.length) {
+      throw new Error("[Mirla Plugin] FATAL ERROR: There are duplicate pids in the main Metadata.csv");
+    }
 
     const siteDomain = rendererInstance.siteConfig.domain;
+    const publicMediaUrl = `${siteDomain}/media/files/collection/images`;
 
-    // Filter out rows that completely lack a PID so they don't crash the JSON
-    const validCollectionData = collectionData.filter((item, index) => {
-      const rowNumber = index + 2; // +2 because row 1 is the header
-      const pid = item.pid;
+    const resolveImagesForPid = (pid) => {
+      const pidStr = pid.toString().trim();
+      let images = [];
+      const singleImageJpg = path.join(imagesInputPath, `${pidStr}.jpg`);
+      const singleImagePng = path.join(imagesInputPath, `${pidStr}.png`);
+      const folderPath = path.join(imagesInputPath, pidStr);
       
-      if (!pid) {
-        console.log(`[Mirla Plugin] ROW ERROR (Row ${rowNumber}): Row without pid. Skipping.`);
-        errorCount++;
-        return false; 
+      if (fs.existsSync(singleImageJpg)) {
+        images.push(`${publicMediaUrl}/${pidStr}.jpg`);
+      } else if (fs.existsSync(singleImagePng)) {
+        images.push(`${publicMediaUrl}/${pidStr}.png`);
+      } else if (fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
+        const files = fs.readdirSync(folderPath);
+        files.forEach(file => {
+          if (file.match(/\.(jpg|jpeg|png|webp)$/i)) {
+            images.push(`${publicMediaUrl}/${pidStr}/${file}`);
+          }
+        });
       }
+      return images;
+    };
 
-      // -- DYNAMIC TYPE VALIDATION --
-      let rowHasTypeErrors = false;
-      const allPidsStr = allPids.map(String); // To ensure safe comparisons
+    // ==========================================
+    // 4. EMBED SECONDARY DATA (RELATIONAL STUBS)
+    // ==========================================
+    const validCollectionData = collectionData.map((item, index) => {
+      const rowNumber = index + 2;
+      const pid = item.pid.toString().trim();
+      item.images = resolveImagesForPid(pid);
 
-      for (const [attr, expectedType] of Object.entries(protocolMap)) {
+      // Validate against the MAIN protocol
+      for (const [attr, expectedType] of Object.entries(mainProtocolMap)) {
         const val = item[attr];
         
-        // Only validate if a value exists (allowing empty cells)
         if (val !== undefined && val !== null && val !== '') {
-          const valStr = val.toString().trim(); // Trim whitespace to prevent broken URLs/IDs
+          const valStr = val.toString().trim();
 
           if (expectedType === 'number') {
             if (typeof val !== 'number' && isNaN(Number(val))) {
-              console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be a number, got: '${val}'`);
-              rowHasTypeErrors = true;
+               console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be a number.`);
             }
           } 
           else if (expectedType === 'link') {
             if (!valStr.startsWith('http://') && !valStr.startsWith('https://')) {
-              console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be a valid link, got: '${val}'`);
-              rowHasTypeErrors = true;
+               console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be a valid link.`);
             }
           } 
-          else if (expectedType === 'ref') {
-            const refs = valStr.split('/');
-            refs.forEach(refPid => {
-              if (!allPidsStr.includes(refPid.trim())) {
-                console.log(`[Mirla Plugin] WARNING (Row ${rowNumber}, pid: ${pid}): '${attr}' references a pid that does not exist in the collection: '${refPid}'`);
-                // Left as a warning so it doesn't break the full build, but it gets reported
-              }
-            });
-          }
           else if (expectedType === 'youtube') {
-            // A YouTube ID usually has 11 characters (letters, numbers, dashes)
             if (valStr.length < 10 || valStr.includes('youtube.com') || valStr.includes('http')) {
-              console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be only the YouTube ID, not the full URL, got: '${val}'`);
-              rowHasTypeErrors = true;
+               console.log(`[Mirla Plugin] TYPE ERROR (Row ${rowNumber}, pid: ${pid}): '${attr}' must be only the YouTube ID.`);
             }
+          }
+          else if (expectedType.startsWith('ref')) {
+             const refs = valStr.split('/');
+             const parsedRefs = [];
+
+             refs.forEach(refPid => {
+               const cleanRefPid = refPid.trim();
+               
+               if (expectedType === 'ref') {
+                 if (!mainPids.includes(cleanRefPid)) {
+                   console.log(`[Mirla Plugin] WARNING (Row ${rowNumber}): '${attr}' references missing pid: '${cleanRefPid}'`);
+                 }
+                 parsedRefs.push(cleanRefPid);
+               } 
+               else if (expectedType.includes(':')) {
+                 const targetTableSuffix = expectedType.split(':')[1].trim();
+                 
+                 if (secondaryTablesData[targetTableSuffix]) {
+                   const targetRecord = secondaryTablesData[targetTableSuffix][cleanRefPid];
+                   
+                   if (targetRecord) {
+                     const stub = {
+                       pid: cleanRefPid,
+                       label: targetRecord.label || cleanRefPid,
+                       images: resolveImagesForPid(cleanRefPid) 
+                     };
+                     parsedRefs.push(stub);
+                   } else {
+                     console.log(`[Mirla Plugin] WARNING (Row ${rowNumber}): Target pid '${cleanRefPid}' not found in Metadata_${targetTableSuffix}.csv`);
+                     parsedRefs.push(cleanRefPid); 
+                   }
+                 } else {
+                     console.log(`[Mirla Plugin] WARNING (Row ${rowNumber}): Protocol asks for table '${targetTableSuffix}', but Metadata_${targetTableSuffix}.csv was not found.`);
+                     parsedRefs.push(cleanRefPid);
+                 }
+               }
+             });
+             
+             item[attr] = parsedRefs.length === 1 ? parsedRefs[0] : parsedRefs;
           }
         }
       }
-
-      if (rowHasTypeErrors) {
-        errorCount++;
-      }
-
-      // -- IMAGE MAPPING --
-      item.images = [];
-      const singleImageJpg = path.join(imagesInputPath, `${pid}.jpg`);
-      const singleImagePng = path.join(imagesInputPath, `${pid}.png`);
-      const folderPath = path.join(imagesInputPath, pid);
-      
-      const publicMediaUrl = `${siteDomain}/media/files/collection/images`;
-
-      if (fs.existsSync(singleImageJpg)) {
-        item.images.push(`${publicMediaUrl}/${pid}.jpg`);
-      } else if (fs.existsSync(singleImagePng)) {
-        item.images.push(`${publicMediaUrl}/${pid}.png`);
-      } 
-      else if (fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
-        const files = fs.readdirSync(folderPath);
-        files.forEach(file => {
-          if (file.match(/\.(jpg|jpeg|png|webp)$/i)) {
-            item.images.push(`${publicMediaUrl}/${pid}/${file}`);
-          }
-        });
-      }
-
-      processedCount++;
-      return true; // Keep this item in the final JSON array
+      return item;
     });
 
-    // ==========================================
-    // 6. SAVE COLLECTION JSON & JS PAYLOAD
-    // ==========================================
-    
-    // Process the gallery filters from config
-    const galleryFiltersStr = this.config.galleryFilters || '';
-    const galleryFilters = galleryFiltersStr.split(',')
-                             .map(s => s.trim())
-                             .filter(s => s !== '');
+    for (const [suffix, dictionary] of Object.entries(secondaryTablesData)) {
+      Object.values(dictionary).forEach(item => {
+        item._collection_type = suffix;
+        item.images = resolveImagesForPid(item.pid);
+        validCollectionData.push(item);
+      });
+    }
 
+    // ==========================================
+    // 5. SAVE COLLECTION JSON & JS PAYLOAD
+    // ==========================================
     const finalJsonPath = path.join(outputDir, 'media', 'files', 'collection', 'collection.json');
     const outputCollectionDir = path.dirname(finalJsonPath);
     if (!fs.existsSync(outputCollectionDir)) {
       fs.mkdirSync(outputCollectionDir, { recursive: true });
     }
 
+    // Save with the UNIFIED protocol so frontend components know all possible fields
     const finalExportData = {
-      protocol: protocolMap,
-      items: validCollectionData,
-      filters: galleryFilters
+      protocol: unifiedProtocolMap,
+      items: validCollectionData
     };
 
-    // Save standard JSON (Good for external integrations/APIs)
     fs.writeFileSync(finalJsonPath, JSON.stringify(finalExportData, null, 2), 'utf8');
 
-    // Save JS Payload (Bypasses fetch restrictions for the Svelte App)
     const jsPayloadPath = path.join(outputCollectionDir, 'collection-data.js');
     const jsPayloadContent = `window.MIRLA_COLLECTION_DATA = ${JSON.stringify(finalExportData)};`;
     fs.writeFileSync(jsPayloadPath, jsPayloadContent, 'utf8');
 
     // ==========================================
-    // 7. GENERATE INDIVIDUAL ITEM PAGES
+    // 6. GENERATE INDIVIDUAL ITEM PAGES
     // ==========================================
     const templatePageId = this.config.templatePageId;
     if (!templatePageId) {
       throw new Error("[Mirla Plugin] FATAL ERROR: No template page selected in settings.");
     }
 
-    // Look up the page using Publii's internal cached dictionary
     const templatePage = rendererInstance.cachedItems.pages[templatePageId] || 
                          (rendererInstance.commonData.pages || []).find(p => p.id.toString() === templatePageId.toString());
 
@@ -263,10 +317,8 @@ class MirlaCollectionGenerator {
 
     const templateSlug = templatePage.slug;
 
-    // Locate the rendered HTML file (Checking for both Clean URLs and Standard URLs)
     const cleanUrlPath = path.join(outputDir, templateSlug, 'index.html');
     const standardUrlPath = path.join(outputDir, `${templateSlug}.html`);
-    
     let templateHtmlPath = '';
     
     if (fs.existsSync(cleanUrlPath)) {
@@ -277,132 +329,129 @@ class MirlaCollectionGenerator {
       throw new Error(`[Mirla Plugin] FATAL ERROR: Could not find compiled HTML for template at either ${templateSlug}.html or ${templateSlug}/index.html`);
     }
 
-    // Read the raw HTML of the template
     const rawTemplateHtml = fs.readFileSync(templateHtmlPath, 'utf8');
-
-    // Create a base directory for all individual item pages
     const itemsOutputDir = path.join(outputDir, 'item');
     if (!fs.existsSync(itemsOutputDir)) {
       fs.mkdirSync(itemsOutputDir, { recursive: true });
     }
 
-    // Parse excluded metadata from config (defaulting to 'pid,label' if empty)
     const excludedMetadataStr = this.config.excludedMetadata || 'pid,label';
-    // Split by comma, trim whitespace, and convert to lowercase for safe comparisons
     const excludedMetadata = excludedMetadataStr.split(',').map(s => s.trim().toLowerCase());
 
     let pagesGenerated = 0;
 
     validCollectionData.forEach(item => {
-      // Create the specific folder for this item using its PID
       const itemFolder = path.join(itemsOutputDir, item.pid);
       if (!fs.existsSync(itemFolder)) {
         fs.mkdirSync(itemFolder, { recursive: true });
       }
 
-      // Prepare the images array for OpenSeadragon
-      const osdImagesArray = JSON.stringify(item.images);
+      const osdImagesArray = JSON.stringify(item.images || []);
 
-      // Helper to determine if it's an external URL or a local file in the collection folder
       const resolveMediaUrl = (pathOrUrl) => {
         const str = pathOrUrl.toString().trim();
         if (str.startsWith('http://') || str.startsWith('https://')) {
           return str;
         }
-        // Assumes relative path from media/files/collection/
         return `${siteDomain}/media/files/collection/${str}`;
       };
 
-      // Build the dynamic Table Rows based on Protocol
       let tableRowsHtml = '';
-      for (const [attr, expectedType] of Object.entries(protocolMap)) {
+      
+      // Select the correct protocol based on the item's type
+      let activeProtocolMap = mainProtocolMap;
+      if (item._collection_type && secondaryProtocolMaps[item._collection_type]) {
+          activeProtocolMap = secondaryProtocolMaps[item._collection_type];
+      }
+
+      for (const [attr, expectedType] of Object.entries(activeProtocolMap)) {
         
-        // Skip this attribute if it is in the exclusion list
         if (excludedMetadata.includes(attr.toLowerCase())) {
           continue; 
         }
 
         const val = item[attr];
         
-        // Only render the row if the item actually has data for this attribute
         if (val !== undefined && val !== null && val !== '') {
-          tableRowsHtml += `<tr class="mirla-table-row">\n<th class="mirla-table-header">${attr}</th>\n`;
-          
+          tableRowsHtml += `<tr class="mirla-table-row">
+<th class="mirla-table-header">${attr}</th>
+`;
           let tdContent = '';
-          const valStr = val.toString().trim();
 
-          switch (expectedType) {
-            case 'link':
-              tdContent = `<a href="${valStr}" target="_blank" rel="noopener noreferrer">${valStr}</a>`;
-              break;
-              
-            case 'ref':
-              // Split by / and create a link for each referenced PID
-              const refs = valStr.split('/');
-              const refLinks = refs.map(refPid => `<a href="${siteDomain}/item/${refPid.trim()}/" class="mirla-ref-link">${refPid.trim()}</a>`);
-              tdContent = refLinks.join(' | ');
-              break;
+          const valIsArray = Array.isArray(val);
+          const iterableVal = valIsArray ? val : [val];
 
-            case 'image':
-              tdContent = `<img src="${resolveMediaUrl(valStr)}" alt="${attr} image" style="max-width: 100%; height: auto; border-radius: 4px;" />`;
-              break;
-
-            case 'video':
-              tdContent = `
+          if (expectedType === 'link') {
+             tdContent = `<a href="${val}" target="_blank" rel="noopener noreferrer">${val}</a>`;
+          }
+          else if (expectedType === 'image') {
+             tdContent = `<img src="${resolveMediaUrl(val)}" alt="${attr} image" style="max-width: 100%; height: auto; border-radius: 4px;" />`;
+          }
+          else if (expectedType === 'video') {
+             tdContent = `
                 <video controls style="max-width: 100%; max-height:600px; border-radius: 4px; background: #000;">
-                  <source src="${resolveMediaUrl(valStr)}">
-                  Your browser does not support the video element.
+                  <source src="${resolveMediaUrl(val)}">
                 </video>`;
-              break;
-
-            case 'audio':
-              tdContent = `
+          }
+          else if (expectedType === 'audio') {
+             tdContent = `
                 <audio controls style="width: 100%;">
-                  <source src="${resolveMediaUrl(valStr)}">
-                  Your browser does not support the audio element.
+                  <source src="${resolveMediaUrl(val)}">
                 </audio>`;
-              break;
-
-            case 'youtube':
-              tdContent = `
+          }
+          else if (expectedType === 'youtube') {
+             tdContent = `
                 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 4px;">
                   <iframe width="560" height="315" 
-                          src="https://www.youtube.com/embed/${valStr}" 
-                          title="YouTube video player" 
-                          frameborder="0" 
-                          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                          referrerpolicy="strict-origin-when-cross-origin" 
-                          allowfullscreen>
+                          src="https://www.youtube.com/embed/${val}" 
+                          frameborder="0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen>
                   </iframe>
                 </div>`;
-              break;
-
-            case 'text':
-            case 'number':
-            case 'latlong':
-            default:
-              tdContent = valStr;
-              break;
+          }
+          else if (expectedType.startsWith('ref')) {
+             const htmlLinks = iterableVal.map(ref => {
+               if (typeof ref === 'object' && ref !== null && ref.pid) {
+                 return `<a href="${siteDomain}/item/${ref.pid}/index.html" class="mirla-ref-link">${ref.label}</a>`;
+               } else {
+                 return `<a href="${siteDomain}/item/${ref}/index.html" class="mirla-ref-link">${ref}</a>`;
+               }
+             });
+             tdContent = htmlLinks.join(' | ');
+          }
+          else {
+             tdContent = Array.isArray(val) ? val.join(', ') : val.toString();
           }
 
-          tableRowsHtml += `<td class="mirla-table-data">${tdContent}</td>\n</tr>\n`;
+          tableRowsHtml += `<td class="mirla-table-data">${tdContent}</td>
+</tr>
+`;
         }
       }
 
-      // Populate the external template
       const itemTitle = item['label'] || item.pid;
+      
       let finalItemHtml = itemTemplateRaw
                             .replace('{{title}}', itemTitle)
                             .replace('{{osd_images_array}}', osdImagesArray)
                             .replace('{{table_rows}}', tableRowsHtml)
                             .replace(/{{site_domain}}/g, siteDomain);
 
-      // Inject into the Publii Page
       let modifiedHtml = rawTemplateHtml.replace('<p>[MIRLA_CONTENT]</p>', finalItemHtml);
       modifiedHtml = modifiedHtml.replace('[MIRLA_CONTENT]', finalItemHtml);
 
-      // Write the final HTML file to the drive
+      // --- NEW FEATURE: Replace the <title> tag in the HTML head ---
+      const siteTitleRegex = /<title>(.*?)<\/title>/i;
+      const match = modifiedHtml.match(siteTitleRegex);
+      if (match) {
+        // Extract the original site name (usually follows a dash or pipe)
+        const originalTitle = match[1];
+        const titleParts = originalTitle.split(/[-|]/);
+        const siteName = titleParts.length > 1 ? ` - ${titleParts[titleParts.length - 1].trim()}` : '';
+        
+        const newTitle = `<title>${itemTitle}${siteName}</title>`;
+        modifiedHtml = modifiedHtml.replace(siteTitleRegex, newTitle);
+      }
+
       const itemHtmlPath = path.join(itemFolder, 'index.html');
       fs.writeFileSync(itemHtmlPath, modifiedHtml, 'utf8');
       
