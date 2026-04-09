@@ -87,8 +87,7 @@
     const styles = getComputedStyle(canvasElement);
     const textColor = styles.getPropertyValue('--pico-color').trim() || '#333';
     const bgColor = styles.getPropertyValue('--pico-background-color').trim() || '#fff';
-    
-    // Explicitly fetching the muted color for links as requested
+
     const linkColor = styles.getPropertyValue('--pico-muted-color').trim() || '#888';
     const activeLinkColor = styles.getPropertyValue('--pico-color').trim() || '#000';
 
@@ -248,8 +247,6 @@
 
     radiusScale.domain([1, d3.max(graph.nodes, d => d.count)]);
 
-    // The Ultimate Drag Offset Fix: 
-    // Always fetch pointer relative to canvas, then invert to simulation space
     const dragBehavior = d3.drag()
       .subject((event) => {
         const [mx, my] = d3.pointer(event, canvas);
@@ -322,7 +319,6 @@
   
   onDestroy(() => { simulation?.stop(); resizeObserver?.disconnect(); });
   
-  // The Zoom Reset Fix: `untrack` prevents Svelte from secretly tracking `activeNodeId`!
   $effect(() => { 
     graph; color; accentSource; accentTarget; 
     untrack(() => {

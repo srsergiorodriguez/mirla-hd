@@ -108,7 +108,7 @@
   }
 
   .img-base {
-    /* Enforces the 500px max height while keeping the native aspect ratio */
+    /* Enforces the max height while keeping the native aspect ratio */
     max-width: 100%;
     max-height: 500px;
     width: auto;

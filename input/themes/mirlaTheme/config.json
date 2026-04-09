@@ -120,7 +120,7 @@
             "name": "themeColorVersion",
             "label": "Color Version",
             "group": "General",
-            "value": "blue",
+            "value": ".blue.",
             "type": "select",
             "options": [
                 {"label": "Red", "value": ".red."},
@@ -441,11 +441,10 @@
     },
     "pageTemplates": {
         "print": "Printable Page Template",
-        "item": "Collection Item Template",
-        "interactive": "Collection Interactive Template"
+        "item": "Collection Item Template"
     },
     "postTemplates": {
-        "interactive": "Collection Interactive Template"
+        "print": "Printable Page Template"
     },
     "extensions": {
         "postEditorConfigOverride": true,

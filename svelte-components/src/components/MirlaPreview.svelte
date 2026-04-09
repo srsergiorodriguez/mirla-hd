@@ -70,7 +70,6 @@
   .mirla-preview-item img {
     width: 100%;
     height: auto;
-    /* Added max height and contain to prevent distortion of tall images */
     max-height: 400px;
     object-fit: contain; 
     border-radius: calc(var(--pico-border-radius, 8px) / 2);

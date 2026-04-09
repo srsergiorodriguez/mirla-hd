@@ -11,7 +11,7 @@
   const items = collectionData.items;
   const siteDomain = window.MIRLA_CONTEXT?.siteDomain || "";
 
-  // Reuse robust split for DH multi-value fields
+  // Split for multi-value fields
   const splitValues = (val) => {
     if (val === null || val === undefined) return [];
     if (typeof val !== 'string') return [String(val)];
@@ -70,7 +70,6 @@
 
   .gallery-grid {
     display: grid;
-    /* Adapts nicely to screen sizes, min width 140px for a clean masonry feel */
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 1.5rem;
   }

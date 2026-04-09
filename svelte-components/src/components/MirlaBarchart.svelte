@@ -244,7 +244,7 @@
   /* Typography and Theme Adapting */
   :global(mirla-barchart svg text) {
     font-family: var(--pico-font-family, inherit);
-    font-size: 0.9rem; /* Increased size, no longer tiny D3 default */
+    font-size: 0.9rem; /* Increased size, not tiny D3 default */
     fill: var(--pico-color, currentColor); /* Dark mode compatible */
   }
 
