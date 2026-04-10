@@ -25,8 +25,8 @@
 
       var viewer = OpenSeadragon({
         id: "osd-viewer",
-        // Point directly to the plugin's exported media folder
-        prefixUrl: "{{site_domain}}/media/plugins/mirla/osd_icons/",
+        // Point directly to the plugin's exported media folder, replace backslashes in windows
+        prefixUrl: "{{site_domain}}/media/plugins/mirla/osd_icons/".replace(/\\/g, "/"),
         sequenceMode: tileSources.length > 1,
         showReferenceStrip: tileSources.length > 1,
         tileSources: tileSources

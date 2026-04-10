@@ -115,8 +115,8 @@
       <div class="filters-grid">
         {#each filterKeys as key}
           <div class="filter-group">
-            <label for="filter-{key}">{key}</label>
-            <select id="filter-{key}" class="filter-select" bind:value={activeFilters[key]}>
+            <label for="filter-{key.replace(/\s+/g, '-')}">{key}</label>
+            <select id="filter-{key.replace(/\s+/g, '-')}" class="filter-select" bind:value={activeFilters[key]}>
               <option value="">- {i18n.all} -</option>
               {#each getUniqueOptions(key) as option}
                 <option value={option}>{option}</option>

@@ -12,7 +12,7 @@ Sigue esta guía para instalar el *tema*, estructurar los datos de tu colección
     - [1. Preparar los archivos de tu colección](#1-preparar-los-archivos-de-tu-colección)
       - [A. `Protocol.csv`](#a-protocolcsv)
       - [B. `Metadata.csv`](#b-metadatacsv)
-      - [C. La carpeta de imágenes (`Images`)](#c-la-carpeta-de-imágenes-images)
+      - [C. La carpeta de imágenes (`images`)](#c-la-carpeta-de-imágenes-images)
       - [D. Otros medios](#d-otros-medios)
       - [E. Tablas secundarias (Bases de datos relacionales)](#e-tablas-secundarias-bases-de-datos-relacionales)
     - [2. Instalar y configurar el plugin](#2-instalar-y-configurar-el-plugin)
@@ -68,7 +68,7 @@ Esta es la hoja de cálculo maestra que contiene los datos principales de tu col
 * Los campos `pid` y `label` son estrictamente obligatorios para cada ítem.
 * Si los encabezados no coinciden, la generación de las páginas individuales de los ítems fallará.
 
-#### C. La carpeta de imágenes (`Images`)
+#### C. La carpeta de imágenes (`images`)
 Esta carpeta contiene los recursos visuales para cada ítem de la colección.
 
 * **Imágenes individuales:** Coloca archivos `.jpg` o `.png` individuales nombrados exactamente igual que el PID del ítem (ej. `item001.jpg`).

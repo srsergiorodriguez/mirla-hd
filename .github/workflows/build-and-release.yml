@@ -18,14 +18,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Zip Mirla Theme
-        run: |
-          cd "input/themes/mirlaTheme"
-          zip -r "${{ github.workspace }}/mirlaTheme.zip" ./*
+        # explicitly set the working directory here instead of using 'cd'
+        working-directory: input/themes/mirlaTheme
+        # Use * to avoid adding './' prefixes to the internal zip paths
+        run: zip -r "${{ github.workspace }}/mirlaTheme.zip" *
 
       - name: Zip Mirla Plugin
-        run: |
-          cd "mirlaPlugin"
-          zip -r "${{ github.workspace }}/mirlaPlugin.zip" ./*
+        working-directory: mirlaPlugin
+        run: zip -r "${{ github.workspace }}/mirlaPlugin.zip" *
 
       # This ensures manual runs get the 'manual-build' tag instead of 'main'
       - name: Set Release Variables
