@@ -2,7 +2,7 @@
   <h1 class="mirla-item-title">{{title}}</h1>
   
   <div class="mirla-viewer-container">
-    <div id="osd-viewer" class="mirla-osd-container"></div>
+    <div id="osd-viewer" data-domain="{{site_domain}}" class="mirla-osd-container"></div>
   </div>
   
   <table class="mirla-metadata-table">
@@ -16,17 +16,22 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    var images = {{osd_images_array}};
+    let images = {{osd_images_array}};
     
     if (images && images.length > 0) {
-      var tileSources = images.map(function(imgUrl) {
+      let tileSources = images.map(function(imgUrl) {
         return { type: 'image', url: imgUrl };
       });
 
-      var viewer = OpenSeadragon({
+      // This solves the backslash issue on windows that prevented icons to be shown
+      const viewerEl = document.getElementById("osd-viewer");
+      const rawDomain = viewerEl.getAttribute("data-domain") || "";
+      const safeDomain = rawDomain.replace(/\\/g, "/");
+
+      let viewer = OpenSeadragon({
         id: "osd-viewer",
         // Point directly to the plugin's exported media folder, replace backslashes in windows
-        prefixUrl: "{{site_domain}}/media/plugins/mirla/osd_icons/".replace(/\\/g, "/"),
+        prefixUrl: safeDomain + "/media/plugins/mirla/osd_icons/",
         sequenceMode: tileSources.length > 1,
         showReferenceStrip: tileSources.length > 1,
         tileSources: tileSources
