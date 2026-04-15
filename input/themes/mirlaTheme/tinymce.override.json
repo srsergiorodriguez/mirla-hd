@@ -1,4 +1,4 @@
 {
-  "extended_valid_elements": ["mirla-preview[*]","mirla-barchart[*]","mirla-tree[*]","mirla-timeline[*]","mirla-network[*]","mirla-gallery[*]","mirla-compare[*]","mirla-map[*]","mirla-waffle[*]","mirla-table[*]","mirla-index[*]"],
-  "custom_elements": ["mirla-preview","mirla-barchart","mirla-tree","mirla-timeline","mirla-network","mirla-gallery","mirla-compare","mirla-map","mirla-waffle","mirla-table","mirla-index"]
+  "extended_valid_elements": ["mirla-preview[*]","mirla-barchart[*]","mirla-tree[*]","mirla-timeline[*]","mirla-network[*]","mirla-gallery[*]","mirla-compare[*]","mirla-map[*]","mirla-waffle[*]","mirla-table[*]","mirla-index[*]","mirla-protocol[*]"],
+  "custom_elements": ["mirla-preview","mirla-barchart","mirla-tree","mirla-timeline","mirla-network","mirla-gallery","mirla-compare","mirla-map","mirla-waffle","mirla-table","mirla-index","mirla-protocol"]
 }

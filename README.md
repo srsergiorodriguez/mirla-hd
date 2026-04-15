@@ -228,11 +228,26 @@ Una cuadrícula de datos de toda tu colección que se puede buscar, ordenar y de
 * `title`: El título que se muestra arriba de la tabla (opcional).
 * `excludedkeys`: Una lista separada por comas de columnas de metadatos para ocultar de la vista pública (opcional).
 
+**12. Diccionario de Datos (Protocol Table)**
+Una tabla interactiva que expone el esquema de tu base de datos (Protocol.csv). Muestra cada atributo, su tipo de dato y su descripción, permitiendo a los usuarios buscar y entender la metodología y estructura de tu colección.
+
+```html
+<mirla-protocol title="Protocolo de datos"></mirla-protocol>
+```
+
+title: El título que se muestra arriba de la tabla (opcional).
+
 ---
 
 ### Solución de problemas comunes
 
-Trabajar con datos estructurados requiere precisión. Si algo no se renderiza correctamente, generalmente se debe a un pequeño error tipográfico o un archivo mal ubicado. Aquí están los problemas más comunes y cómo solucionarlos:
+Trabajar con datos estructurados requiere precisión. Si algo no se renderiza correctamente, generalmente se debe a un pequeño error tipográfico o un archivo mal ubicado. 
+
+Cada vez que el plugin de Mirla se ejecuta, genera de manera automática un archivo de diagnóstico llamado `mirla-report.txt`. Este archivo se guarda directamente en la carpeta de tu colección (`input/media/files/collection/`). 
+
+Si tu colección falla o algunos elementos no se muestran correctamente, abre este archivo de texto. El reporte te indicará exactamente en qué fila y en qué documento (Protocolo o Metadatos) se encuentra el error. Te notificará sobre identificadores faltantes (PIDs), tipos de datos incorrectos (ej. poner letras donde va un número), o referencias a tablas secundarias que no existen, facilitando la corrección rápida sin necesidad de usar la consola de desarrollador del navegador. Si todo funciona perfectamente, el archivo simplemente reportará un estado de éxito.
+
+Además de esto, aquí están los problemas más comunes y cómo solucionarlos:
 
 **1. "¡Las páginas de mis ítems no se generan!"**
 * **Revisa tu Página plantilla de ítem:** ¿Recordaste hacer clic en "Publicar" en tu Página Base en Publii? El plugin no puede usarla si está guardada como borrador.

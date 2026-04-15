@@ -2,6 +2,7 @@
 
 /* Base style for all Mirla custom elements in the editor */
 mirla-index,
+mirla-protocol,
 mirla-table,
 mirla-gallery,
 mirla-barchart,
@@ -29,6 +30,7 @@ mirla-compare {
 
 /* Base text styling for the pseudo-elements */
 mirla-index::before,
+mirla-protocol::before,
 mirla-table::before,
 mirla-gallery::before,
 mirla-barchart::before,
@@ -47,7 +49,7 @@ mirla-compare::before {
 
 /* --- SPECIFIC COMPONENT LABELS --- */
 
-/* 1. Index Gallery */
+/* Index Gallery */
 mirla-index::before {
   content: "📦 Mirla Index Gallery (Type: " attr(type) ")";
 }
@@ -57,9 +59,18 @@ mirla-index[type=""]::before {
   content: "📦 Mirla Index Gallery (Main Collection)";
 }
 
-/* 2. Metadata Table */
+/* Metadata Table */
 mirla-table::before {
   content: "🗄️ Mirla Metadata Table";
+}
+
+/* Protocol Table */
+mirla-protocol::before {
+  content: "📖 Mirla Protocol / Data Dictionary";
+}
+
+mirla-protocol[title]::after {
+  content: "Title: " attr(title);
 }
 
 /* 3. Previews & Inline Galleries */
