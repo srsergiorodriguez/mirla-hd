@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Publicaciones crossmedia con Mirla - Mirla HD - Mirla HD</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Syne:wght@400..800&display=swap" rel="stylesheet"><style>:root {
+      --page-width: 5.5in;
+      --page-height: 8.1in;
+
+      /* Typography Variables */
+      --font-body: "IBM Plex Sans", sans-serif;
+      --font-heading: "Syne", sans-serif;
+      --font-code: 'Source Code Pro', monospace;
+      --size-code: 8pt;
+    }
+
+    img, canvas {
+      filter: grayscale(100%) brightness(120%) contrast(120%); /* For improving B&W, laser printed publications */
+    }
+
+    body {
+      background-color: gray;
+    }
+
+    .footnote {
+      font-family: var(--font-body);
+      float: footnote; /* superscript */
+      font-size: 8pt;
+      line-height: 1.2;
+      text-align: left;
+      text-justify: none;
+    }
+
+    /* Number in text */
+    ::footnote-call {
+      font-size: 0.8em;
+      vertical-align: super;
+      line-height: none;
+    }
+
+    /* Number at the bottom */
+    ::footnote-marker {
+      font-size: 8pt;
+      margin-right: 0.5em;
+    }
+
+    /* Page config */
+    @page {
+      /* top, right, bottom, left */ 
+      margin: 20mm 13mm 20mm 13mm;
+
+      @top-center {
+        content: "Publicaciones crossmedia con Mirla - Mirla HD ";
+        /* Project name */
+        font-family: var(--font-heading);
+        font-size: 8pt;
+        color: #666;
+      }
+
+      @footnote {
+        float: bottom;
+        border-top: 0.5pt solid black;
+        padding-top: 8pt;
+        margin-top: 5mm;
+      }
+    }
+
+    /* Even pages, left */
+    @page :left {
+      margin-right: 16mm;
+      /* Uncomment this when using sidenotes: */
+      /* margin-left: 40mm;  */
+
+      @top-left-corner {
+        content: counter(page);
+        font-family: var(--font-heading);
+        font-size: 8pt;
+        /* This can be used to adjust the page number when using sidenotes: */
+        /* text-align: center; */
+      }
+    }
+
+    /* Odd pages, right */
+    @page :right {
+      margin-left: 16mm;
+      /* Uncomment this when using sidenotes: */
+      /* margin-right: 40mm;  */
+      
+      @top-right-corner {
+        content: counter(page);
+        font-family: var(--font-heading);
+        font-size: 8pt;
+        /* This can be used to adjust the page number when using sidenotes: */
+        /* text-align: center; *//
+      }
+    }
+
+    #page-entry {
+      font-family: var(--font-body);
+      font-size: 11pt;
+      line-height: 1.3;
+      color: #000;
+      text-align: justify;
+      text-align-last: left;
+    }
+
+    pre {
+      white-space: pre-wrap;       /* CSS3 */
+      white-space: -moz-pre-wrap;  /* Mozilla */
+      white-space: -pre-wrap;      /* Opera 4-6 */
+      white-space: -o-pre-wrap;    /* Opera 7 */
+      word-wrap: break-word;       /* IE 5.5+ / Modern browsers */
+      overflow-wrap: break-word;
+      
+      background-color: #d3d3d3;
+      padding: 3mm;
+      
+      font-family: var(--font-code);
+      font-size: var(--size-code);
+      line-height: 1.4;
+      break-inside: avoid; /* Tries to prevent the code block from splitting across two pages */
+    }
+
+    code {
+      font-family: var(--font-code);
+      font-size: var(--size-code);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    #page-entry p {
+      orphans: 2;
+      /* Minimum lines at the bottom of a page */
+      widows: 2;
+      /* Minimum lines at the top of a page */
+    }
+
+    @media print {
+      .pagedjs_pages {
+        display: block !important;
+        padding: 0 !important;
+      }
+
+      .pagedjs_page {
+        background-color: white;
+        margin: 0 !important;
+        border: none !important;
+        margin-bottom: 10px !important;
+      }
+    }
+
+    /* Use this classes for creating chapters and other page breaks */
+
+    .right-page-break {
+      break-before: right;
+    }
+
+    .left-page-break {
+      break-before: left;
+    }
+    
+    .page-break {
+      break-before: page;
+    }
+
+    .no-page-number {
+      @top-left-corner {
+        content: none;
+      }
+
+      @top-right-corner {
+        content: none;
+      }
+    }
+
+    /* Text */
+
+    h1,h2,h3,h4,h5,h6 {
+      font-family: var(--font-heading);
+      text-align: left;
+      text-align-last: left;
+      break-after: avoid;
+    }
+
+    h1 {
+      text-align: center;
+      text-align-last: center;
+      margin-bottom: 2rem;
+    }
+
+    /* Images (following Publii's image classes) */
+
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+      /* lock aspect ratio */
+      break-inside: avoid;
+      display: block;
+      margin: 0 auto;
+    }
+
+    figure.post__image {
+      display: block !important;
+      width: 100% !important;
+      margin: 0.5rem 0 !important;
+      overflow: hidden !important;
+      /* Acts as a clearfix so text stays below */
+      break-inside: avoid;
+      /* Prevents the image/caption from splitting across pages */
+    }
+
+    figure.post__image--left {
+      padding: 10px;
+      float: left !important;
+      width: 60% !important;
+      margin: 0 !important;
+    }
+
+    figure.post__image--left+figcaption {
+      float: right !important;
+      /* Float to the opposite side */
+      clear: none !important;
+      /* Do NOT push under the image */
+      width: 35% !important;
+      /* Leaves a 5% gap in the middle */
+      text-align: left !important;
+      /* Hugs the text towards the image */
+      text-align-last: left !important;
+      margin: 0 !important;
+    }
+
+    figure.post__image--right {
+      padding: 10px;
+      float: right !important;
+      width: 60% !important;
+      margin: 0 !important;
+    }
+
+    figure.post__image--right+figcaption {
+      float: left !important;
+      clear: none !important;
+      width: 35% !important;
+      text-align: right !important;
+      text-align-last: right !important;
+      margin: 0 !important;
+    }
+
+    figure.post__image--center {
+      display: block !important;
+      float: none !important;
+      margin: 0.5rem auto !important;
+    }
+
+    figure.post__image--center+figcaption {
+      text-align: center !important;
+      text-align-last: center !important;
+      width: 100% !important;
+    }
+
+    figure.post__image--wide,
+    figure.post__image--full {
+      display: block !important;
+      float: none !important;
+      width: 100% !important;
+      margin: 0.5rem 0 !important;
+    }
+
+    figcaption {
+      font-family: var(--font-body);
+      font-size: 8pt;
+      color: #555;
+      margin-top: 0.5rem;
+      display: block;
+    }
+
+    /* Special Named page that removes margins and content */
+    @page emptypage {
+      margin: 0;
+      /* Top Margin Boxes */
+      @top-left-corner { content: none !important; }
+      @top-left { content: none !important; }
+      @top-center { content: none !important; }
+      @top-right { content: none !important; }
+      @top-right-corner { content: none !important; }
+
+      /* Bottom Margin Boxes */
+      @bottom-left-corner { content: none !important; }
+      @bottom-left { content: none !important; }
+      @bottom-center { content: none !important; }
+      @bottom-right { content: none !important; }
+      @bottom-right-corner { content: none !important; }
+
+      /* Side Margin Boxes */
+      @left-top { content: none !important; }
+      @left-middle { content: none !important; }
+      @left-bottom { content: none !important; }
+      @right-top { content: none !important; }
+      @right-middle { content: none !important; }
+      @right-bottom { content: none !important; }
+    }
+
+    .full-image-page {
+      page: emptypage;
+      break-before: page;
+      break-after: page;
+    }
+
+    .full-image-page img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      /* Use object-position in the particular style of the element to put it in particular places */
+    }
+
+    /* --- Sidenotes --- */
+    .sidenote {
+      width: 25mm;
+      font-family: var(--font-body);
+      font-size: 7.5pt;
+      line-height: 1.3;
+      clear: both;
+      text-align: left;
+      text-align-last: left;
+    }
+
+    /* On Left pages, push the note into the left margin */
+    .pagedjs_left_page .sidenote {
+      float: left;
+      margin-left: -30mm;
+    }
+
+    /* On Right pages, push the note into the right margin */
+    .pagedjs_right_page .sidenote {
+      float: right;
+      margin-right: -30mm;
+    }
+
+    /* Canvas page */
+    .canvas-page {
+      page: emptypage;
+      break-after: page;
+      position: relative;
+      display: block; 
+      break-inside: avoid;
+    }
+
+    /* Ensure all text elements sit on top of the canvas */
+    .canvas-page > *:not(.generative-canvas,.generative-separator) {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* The canvas stays pinned to the edges */
+    .generative-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Inline Generative Separators */
+    .generative-separator {
+      display: block;
+      width: 100%;
+      height: 10mm; /* A fixed physical height for print */
+      margin: 2mm 0; /* Breathing room above and below */
+    }</style><style data-pagedjs-ignore>/* Style for the floating modal */
+    .zine-instructions {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      width: 300px;
+      font-family: "Arial", sans-serif;
+      z-index: 9999;
+    }
+
+    .zine-instructions code {
+      display: block;
+      background: #eee;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 11px;
+    }
+
+    @media print {
+
+      /* When you hit Ctrl+P, the browser reads this and hides the modal from the PDF */
+      .zine-instructions {
+        display: none !important;
+      }
+    }</style></head><body><main class="page print-container"><article><div id="page-entry"><div class="canvas-page"><canvas class="generative-canvas" data-type="portada-tutorial"></canvas><div style="text-align: center; color: white; background: black; padding: 20px;"><h1>Publicaciones crossmedia con Mirla</h1><h2><em>Una guía práctica</em></h2><p>Por Sergio R. G.</p></div></div><h2 class="right-page-break">Publicaciones Crossmedia</h2><p>Una publicación crossmedia existe simultáneamente en varios medios... usualmente, uno digital, como un sitio web, y uno físico, como un fanzine. A diferencia del transmedia, en el que cada medio es complementario, el crossmedia implica una redundancia del contenido. Sin embargo, esa redundancia es útil, pues permite jugar con distintas maneras de expresar y circular el mismo contenido; a través de internet y del mano a mano.</p><p>Este documento es una guía, pero también una muestra, de Mirla, un sistema para hacer colecciones digitales y publicaciones crossmedia basado en el generador de sitios web estáticos <a href="https://getpublii.com/" target="_blank" rel="noopener noreferrer">Publii</a>. El documento fue redactado en un entorno web, diseñado con CSS y enriquecido con algoritmos generativos. A continuación, exploraremos paso a paso cómo puedes adaptar tus propios proyectos editoriales para hacer algo similar.</p><p>Mirla incluye un sistema integrado basado en <a href="https://pagedjs.org/">Paged.js</a> y <a href="https://p5js.org/">p5.js</a> que te permite tomar cualquier contenido web y convertirlo en una publicación lista para imprimir con elementos de arte generativo.</p><h3 class="right-page-break">Paso 0. Instalar Publii y el tema de Mirla</h3><p>Antes que nada, debes instalar en tu computador el generador de sitios web estáticos Publii (<a href="https://getpublii.com/">https://getpublii.com/</a>) en tu computador. El software es gratuito, de código abierto, y está disponible para Windows, Mac y Linux. Para empezar a trabajar, debes abrir Publii y crear un proyecto de sitio web.</p><p>Luego, debes ir al repositorio de Mirla, a la página de lanzamientos o releases (<a href="https://github.com/srsergiorodriguez/mirla-hd/releases">https://github.com/srsergiorodriguez/mirla-hd/releases</a>), y descargar la versión más reciente de mirlaTheme.zip. Luego vas a Publii, haces clic en los tres puntos o la campana de la esquina superior derecha, vas a themes y le das instalar un nuevo tema. Te pedirá que escojas el archivo con el tema, debes indicar la ruta de descarga de mirlaTheme.zip.</p><p>Finalmente, debes ir a Site Settings en la barra lateral de Publii y escoger que usaras mirlaTheme para este sitio web. En esa misma barra lateral encuentras también Theme, allí puedes escoger aspectos generales del tema, como el modo de color, la tipografía y otras cosas. Puedes previsualizar el diseño en cualquier momento haciendo clic en Preview your changes, en la barra lateral.</p><p><canvas class="generative-separator" data-type="separador"> </canvas></p><h3 class="page-break">Paso 1. Crear el contenido web</h3><p>Publii permite crear varios elementos convencionales en un sitio web, páginas, posts, menús, autores, etc. Puedes crear el contenido de tu sitio web como mejor consideres.</p><p>Para hacer la página que usaremos como base para la publicación crossmedia, crea una página normal utilizando el editor visual de Publii. Estructura muy bien tu texto utilizando las etiquetas semánticas estándar (Títulos H1, H2, Párrafos, Citas e Imágenes).</p><blockquote><p><strong>Recomendación:</strong> El motor de impresión está diseñado para leer estas etiquetas y aplicarles automáticamente el formato de libro (márgenes, saltos de página y notas al pie).</p></blockquote><h3 class="page-break">Paso 2. Generar la versión de impresión</h3><p>En la lista de páginas de Publii, encuentra tu página original y haz clic en Duplicar. Hazlo cuando el contenido esté terminado para que ambas versiones sean idénticas.</p><p>En la página duplicada, ve a la barra de la derecha, ve a Other options &gt; Template y selecciona Printable Page Template. Esto le indicará a Publii que esta página duplicada usará un formato distinto, apto para impresión.</p><p>Al previsualizar, el diseño web desaparecerá y se mostrarán las páginas físicas, con márgenes, paginación, etc.</p><h3 class="page-break">Paso 3. Ajustar el diseño de impresión (CSS)</h3><p>El diseño de la versión física se controla desde el archivo <code>page-print.hbs</code>. Este archivo está en la carpeta del proyecto (usualmente <code>documentos/Publii/sites/[nombre-del-proyecto]/input/themes/mirlaTheme/page-print.hbs</code>). Al editar este código CSS, cambias la forma en la que se presenta el PDF final imprimible sin afectar tu sitio web original.</p><p>Algunas cosas clave que puedes y debes editar en este archivo son:</p><h4>Tamaño de página y tipografía</h4><p>Al inicio del bloque de estilos CSS encontrarás una sección llamada <code>:root</code>. Aquí se definen las variables maestras de tu fanzine. Puedes alterar las dimensiones del papel (usando pulgadas <code>in</code>, milímetros <code>mm</code> o centímetros <code>cm</code>) y cambiar las fuentes tipográficas por defecto:</p><pre><code>:root {
+  /* Tamaño de la página (Ej. Media Carta) */
+  --page-width: 5.5in;
+  --page-height: 8.5in;
+
+  /* Variables Tipográficas */
+  --font-body: 'EB Garamond', serif;
+  --font-heading: 'Libre Franklin', sans-serif;
+}</code></pre><h4>Márgenes y lomo</h4><p>Los márgenes físicos del papel se definen directamente usando las reglas <code>@page</code>. Si vas a grapar o encuadernar tu publicación, es importante dejar un margen interior (lomo) más amplio que el margen exterior. Modifica los milímetros en esta sección:</p><pre><code>@page :left {
+  margin-left: 15mm;  /* Margen exterior */
+  margin-right: 20mm; /* Margen interior (Lomo) */
+}
+@page :right {
+  margin-left: 20mm; /* Margen interior (Lomo) */
+  margin-right: 15mm; /* Margen exterior */
+}</code></pre><h4>Controlar los saltos de página</h4><p>A veces quieres forzar que un capítulo nuevo empiece en una página limpia, en lugar de continuar inmediatamente debajo del texto anterior. Para esto, puedes usar unas clases de CSS especiales directamente en el editor HTML de Publii:</p><ul><li><code>&lt;h2 class="page-break"&gt;Capítulo 2&lt;/h2&gt;</code>: Empuja este título a la siguiente página disponible.</li><li><code>&lt;h2 class="right-page-break"&gt;Capítulo 2&lt;/h2&gt;</code>: Empuja el título específicamente a una <strong>página derecha (impar)</strong>. Paged.js insertará una página en blanco si es necesario para lograrlo. Es ideal para iniciar nuevas secciones.</li></ul><h3 class="page-break">Paso 4. Configurar páginas generativas (arte con p5.js)</h3><p>Puedes incluir páginas especiales que contengan arte generativo programado con la librería de código creativo p5.js (<a href="https://p5js.org/">https://p5js.org/</a>). Así, cada vez que se recarga la página, es posible generar ilustraciones diferentes, lo que le da un aspecto único a los ejemplares impresos.</p><p>En el editor de Publii, cambia a la vista de código HTML e inserta un bloque como este en donde quieras incluir una página generativa:</p><pre><code>&lt;div class="canvas-page"&gt;
+  &lt;canvas class="generative-canvas" data-type="mi-portada"&gt;&lt;/canvas&gt;
+  &lt;h1&gt;Título de mi Zine&lt;/h1&gt;
+&lt;/div&gt;</code></pre><p>Dentro del div con clase 'canvas-page' debes incluir un canvas con la clase 'generative-canvas'. Además de eso, puedes incluir otros elementos HTML, como títulos o párrafos que se superpondrán al canvas con la imagen generativa.</p><p>El attribute data-type es un nombre especial que usarás para distinguir un arte generativo de otro en el código. Para programar el arte, edita el archivo <code>zine.js</code> en la carpeta del proyecto (usualmente documentos/Publii/sites/[nombre-del-proyecto]/input/themes/mirlaTheme/assets/js/zine.js):</p><pre><code>case 'mi-portada':
+  p.strokeWeight(2);
+  p.noFill();
+  p.stroke(0); 
+  for (let x = 0; x &lt; p.width; x += 50) {
+    for (let y = 0; y &lt; p.height; y += 50) {
+      if (p.random() &gt; 0.5) p.circle(x, y, p.random(10, 40));
+    }
+  }
+  break;</code></pre><h3 class="page-break">Paso 5. Exportación e imposición</h3><p>Una vez que el contenido, los estilos CSS y el arte generativo estén listos, es momento de transformar tu código web en un objeto físico.</p><h4>Exportar el PDF</h4><p>Estando en la previsualización de tu página imprimible (donde ves las páginas blancas sobre el fondo gris), abre el diálogo de impresión de tu navegador presionando <strong>Ctrl+P</strong> (o Cmd+P en Mac). Cambia la impresora destino a <strong>"Guardar como PDF"</strong>.</p><p>Para que el archivo quede perfecto, debes realizar dos configuraciones vitales en esa misma ventana (usualmente bajo el botón de "Más opciones"):</p><ol><li><strong>Márgenes:</strong> Cámbialos a <strong>"Ninguno"</strong> (None). Paged.js ya calculó los márgenes exactos de tu fanzine; si el navegador añade sus propios márgenes, el diseño se encogerá y se dañará.</li><li><strong>Gráficos de fondo:</strong> Asegúrate de que esta opción esté <strong>activada</strong>. De lo contrario, los colores de fondo y las imágenes de tu arte generativo podrían no exportarse.</li></ol><p>Guarda el PDF en tu computador.</p><h4>¿Qué es la imposición o compaginación?</h4><p>El PDF que acabas de exportar es de lectura secuencial. Es decir, las páginas van en orden numérico (1, 2, 3, 4...). Sin embargo, para imprimir un fanzine físico y doblarlo por la mitad (formato <em>booklet</em> o cuadernillo), las páginas deben reordenarse y emparejarse de una forma muy específica en la misma hoja de papel (por ejemplo, la primera y la última página se imprimen juntas). A este proceso matemático de reordenamiento se le conoce como <strong>imposición</strong> o compaginación.</p><h4>Herramientas de Imposición</h4><p>Paged.js diseña el libro, pero no hace la imposición. Para preparar tu archivo final para la impresora a doble cara, toma tu PDF exportado y pásalo por alguna de estas herramientas especializadas:</p><ul><li><strong><a href="https://spectrolite.app/" target="_blank" rel="noopener">Spectrolite</a>:</strong> Nuestra opción recomendada. Es una aplicación de escritorio visual (Mac/Windows) extremadamente fácil de usar, diseñada específicamente para hacer fanzines y separaciones de color para risografía. Solo arrastras tu PDF y seleccionas la opción de imposición para zines.</li><li><strong><a href="https://pdfcpu.io/" target="_blank" rel="noopener">pdfcpu</a>:</strong> Una herramienta de línea de comandos muy ligera pero poderosa, ideal para usuarios que prefieren trabajar desde la terminal.</li><li><strong><a href="https://pdfimpose.it/" target="_blank" rel="noopener">pdfimpose.it</a> o <a href="https://online2pdf.com/" target="_blank" rel="noopener">online2pdf</a>:</strong> Alternativas rápidas y gratuitas que funcionan directamente en el navegador de internet sin tener que instalar nada.</li></ul><blockquote><p><em>Tip de impresión:</em> Al momento de imprimir el PDF ya compaginado, si vas a imprimir a doble cara, asegúrate de configurar tu impresora para que voltee la hoja por el <strong>"Borde corto"</strong> (Flip on short edge). ¡Esto evitará que la mitad de tus páginas queden al revés!</p></blockquote><div class="canvas-page"> </div><div class="canvas-page back-page"><canvas class="generative-canvas" data-type="portada-tutorial"> </canvas></div></div></article></main></body><script src="https://srsergiorodriguez.github.io/mirla-hd/assets/js/p5.min.js?v=b2d8c06b429a4ea90db795044781dbf3"></script><script src="https://srsergiorodriguez.github.io/mirla-hd/assets/js/zine.js?v=ff65fe6e36ad68e3dca7cf98b97e8e56"></script><script src="https://srsergiorodriguez.github.io/mirla-hd/assets/js/paged.polyfill.js?v=28be5336e03f6072740a5cad2f787314" onload="startZine()"></script></html>

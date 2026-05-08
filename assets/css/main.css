@@ -73,12 +73,12 @@
 :root,
 .sl-theme-light,
 .sl-theme-dark {
-  /* 1. Sync Typography */
+  /* Sync Typography */
   --sl-font-sans: var(--pico-font-family);
   --sl-font-serif: var(--pico-font-family-heading);
   
-  /* 2. Sync Primary Colors using color-mix */
-  /* We map Shoelace's 500/600/700 (standard states) to Pico's primary variables */
+  /* Sync Primary Colors using color-mix */
+  /* Map Shoelace's 500/600/700 (standard states) to Pico's primary variables */
   
   --sl-color-primary-50:  color-mix(in srgb, var(--pico-primary), white 95%);
   --sl-color-primary-100: color-mix(in srgb, var(--pico-primary), white 90%);
@@ -86,7 +86,7 @@
   --sl-color-primary-300: color-mix(in srgb, var(--pico-primary), white 60%);
   --sl-color-primary-400: color-mix(in srgb, var(--pico-primary), white 40%);
   
-  /* The "Base" state is mapped directly to your Pico primary */
+  /* The base state is mapped directly to Pico primary */
   --sl-color-primary-500: var(--pico-primary); 
   
   /* Hover and Focus states are derived from Pico's primary-hover */
@@ -95,17 +95,17 @@
   --sl-color-primary-800: color-mix(in srgb, var(--pico-primary-hover), black 40%);
   --sl-color-primary-900: color-mix(in srgb, var(--pico-primary-hover), black 60%);
 
-  /* 3. Sync Neutral Scales (Backgrounds & Borders) */
+  /* Sync Neutral Scales (Backgrounds & Borders) */
   --sl-input-background-color: var(--pico-background-color);
   --sl-input-border-color: var(--pico-border-color);
   --sl-input-color: var(--pico-color);
   
-  /* 4. Sync Border Radii and Spacing */
+  /* Sync Border Radii and Spacing */
   --sl-border-radius-medium: var(--pico-border-radius);
   --sl-input-border-radius-medium: var(--pico-border-radius);
   --sl-spacing-medium: var(--pico-spacing);
 
-  /* 5. Sync Shadows & Focus Rings */
+  /* Sync Shadows & Focus Rings */
   --sl-focus-ring-color: color-mix(in srgb, var(--pico-primary), transparent 60%);
   --sl-shadow-x-small: var(--pico-box-shadow);
 }
@@ -463,7 +463,7 @@ hr {
       "sidebar"
       "footer";
     
-    /* Optional: reduce the gap for smaller screens */
+    /* reduce the gap for smaller screens */
     grid-gap: 1.5em;
     padding: 0 1rem; /* Prevents text from touching the screen edges */
   }
