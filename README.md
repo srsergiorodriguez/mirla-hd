@@ -26,6 +26,11 @@ Sigue esta guía para instalar el *tema*, estructurar los datos de tu colección
       - [Componentes de gestión de datos](#componentes-de-gestión-de-datos)
     - [Solución de problemas comunes](#solución-de-problemas-comunes)
   - [Publicaciones crossmedia](#publicaciones-crossmedia)
+    - [1. Creación del contenido en el editor](#1-creación-del-contenido-en-el-editor)
+    - [2. Configurar páginas generativas (arte con p5.js)](#2-configurar-páginas-generativas-arte-con-p5js)
+    - [3. Generar la versión de impresión](#3-generar-la-versión-de-impresión)
+    - [4. Ajustar el diseño de impresión (CSS)](#4-ajustar-el-diseño-de-impresión-css)
+    - [5. Exportación e imposición (o compaginación)](#5-exportación-e-imposición-o-compaginación)
 
 ---
 
@@ -278,4 +283,102 @@ Además de esto, aquí están los problemas más comunes y cómo solucionarlos:
 
 ## Publicaciones crossmedia
 
-(Documentación en proceso... :pray:)
+Mirla incluye un sistema integrado basado en [Paged.js](https://pagedjs.org/) y [p5.js](https://p5js.org/) que te permite tomar cualquier artículo o ensayo web y convertirlo en una publicación lista para imprimir (como un fanzine o cuadernillo) con portadas de arte generativo.
+
+Para utilizar esta funcionalidad, sigue estos pasos:
+
+### 1. Creación del contenido en el editor
+Crea una página normal utilizando el editor visual de Publii.
+
+*Recomendación*: Estructura muy bien tu texto utilizando las etiquetas semánticas estándar (Títulos H1, H2, Párrafos, Citas Blockquote e Imágenes). El motor de impresión está diseñado para leer estas etiquetas y aplicarles automáticamente el formato de libro (márgenes, saltos de página, notas al pie, etc.).
+
+### 2. Configurar páginas generativas (arte con p5.js)
+Puedes incluir páginas especiales que contengan arte generativo (por ejemplo, para la portada o contraportada de tu publicación). Así, cada vez que se recarga la página, se pueden generar una ilustraciones diferentes para aquellas páginas, lo que le dará un aspecto único a los ejemplares impresos.
+
+En el editor de Publii, cambia a la vista de código HTML (<>).
+
+Inserta el siguiente bloque donde quieras que aparezca el arte, e incluye elementos html convencionales, como el h1 que se muestra de ejemplo:
+
+```html
+<div class="canvas-page">
+  <canvas class="generative-canvas" data-type="mi-portada"></canvas>
+  <h1>Título de mi Zine</h1>
+</div>
+```
+
+(Nota: Al volver a la vista visual, verás un recuadro indicando dónde está el canvas, y tu título H1 seguirá siendo editable).
+
+Para programar el arte, abre el archivo zine.js que se encuentra en la carpeta del tema \(`input/themes/mirlaTheme/assets/js/zine.js`\). Busca el bloque switch (artType) y añade un nuevo caso que coincida con tu data-type.
+
+⚠️ Importante sobre p5.js en Mirla: Para que el arte conviva con el generador de PDFs, utilizamos p5.js en "Modo Instancia". Esto significa que cada comando de p5.js debe llevar un p. antes. (Ej. p.fill(0) en lugar de fill(0)).
+
+Ejemplo de código para una portada personalizada:
+
+```javascript
+case 'mi-portada':
+  p.strokeWeight(2);
+  p.noFill();
+  p.stroke(0); // Color negro
+  
+  // Dibujar una cuadrícula generativa
+  for (let x = 0; x < p.width; x += 50) {
+    for (let y = 0; y < p.height; y += 50) {
+      if (p.random() > 0.5) {
+        p.circle(x, y, p.random(10, 40));
+      }
+    }
+  }
+  break;
+```
+
+### 3. Generar la versión de impresión
+Para mantener tu artículo web intacto y generar una versión paralela para imprimir:
+
+- Ve a la lista de páginas en Publii.
+- Encuentra tu página original y haz clic en Duplicar (el ícono de las dos hojas). Idealmente haces esto cuando ya terminaste de agregar el contenido, para que en las dos versiones sea exactamente igual.
+- Entra a la página duplicada. En el menú lateral derecho, baja hasta la sección Otras opciones (**Other options**).
+- En el menú desplegable de Plantilla (**Template**), selecciona **Printable Page Template**.
+- Guarda y previsualiza la página. Verás que el diseño web desaparece y el navegador renderiza las páginas físicas calculadas por Paged.js.
+
+### 4. Ajustar el diseño de impresión (CSS)
+El diseño físico de tu fanzine se controla exclusivamente desde la etiqueta <style> superior en el archivo `page\-print.hbs`. Está en `input/themes/mirlaTheme/page\-print.hbs`. Al editar este archivo, cambias el PDF sin afectar el diseño de tu web.
+
+*Tamaño y iipografía*: busca la sección :root al principio del CSS. Aquí puedes cambiar las dimensiones del papel (ej. --page-width: 5.5in;) y las fuentes tipográficas.
+
+*Márgenes*: Los márgenes se definen directamente usando CSS estándar en las reglas @page. Si deseas cambiar el espacio para la encuadernación (el lomo), busca este bloque y modifica los milímetros (mm):
+
+```css
+/* Configuración general de márgenes (Arriba, Derecha, Abajo, Izquierda) */
+@page {
+  margin: 15mm 15mm 20mm 15mm;
+}
+
+/* Páginas pares (Izquierda) */
+@page :left {
+  margin-left: 15mm; /* Margen exterior */
+  margin-right: 20mm; /* Margen interior (Lomo) */
+}
+
+/* Páginas impares (Derecha) */
+@page :right {
+  margin-left: 20mm; /* Margen interior (Lomo) */
+  margin-right: 15mm; /* Margen exterior */
+}
+```
+
+*Saltos de página*: Puedes forzar a que un capítulo nuevo empiece en una página limpia usando estas clases directamente en tu HTML de Publii:
+
+`<h2 class="page-break">Capítulo 2</h2>`: Fuerza el salto a la siguiente página.
+
+`<h2 class="right-page-break">Capítulo 2</h2>`: Fuerza el salto específicamente a una página impar (derecha), ideal para inicios de sección.
+
+### 5. Exportación e imposición (o compaginación)
+Estando en la previsualización de tu página imprimible, abre el diálogo de impresión de tu navegador (Ctrl+P o Cmd+P) y guárdalo como PDF.
+
+Asegúrate de configurar los márgenes del navegador en "Ninguno" y activar la opción de "Gráficos de fondo" para que el arte se exporte correctamente.
+
+El PDF exportado tendrá páginas secuenciales (1, 2, 3, 4...). Para imprimir y doblar un fanzine físico, necesitas "imponer" o "compaginar" el documento (ordenar las páginas en formato cuadernillo o booklet). Paged.js no hace esto, pero puedes usar cualquiera de estas herramientas complementarias:
+
+- [Spectrolite](https://spectrolite.app/): aplicación de escritorio con funciones para la separación de color para risografía, incluye opciones de imposición (Mac/Windows).
+- [pdfcpu](https://pdfcpu.io/): una herramienta de línea de comandos que tiene múltiples funciones avanzadas de imposición.
+- [online2pdf](https://online2pdf.com/en/create-a-booklet): una alternativa rápida y gratuita que funciona directamente en el navegador.

@@ -65,8 +65,18 @@ function drawGenerativePages(canvasElement, pageIndex) {
 
   new p5((p) => {
     p.setup = () => {
-      p.createCanvas(printWidthPx || 1650, printHeightPx || 2550, p.P2D, canvasElement);
+      let w = printWidthPx || 1650;
+      let h = printHeightPx || 2550;
+
+      if (canvasElement.classList.contains('generative-separator')) {
+         h = toPixels('10mm'); 
+      }
+
+      p.createCanvas(w, h, p.P2D, canvasElement);
       p.noLoop();
+
+      canvasElement.style.width = '100%';
+      canvasElement.style.height = 'auto';
 
       p.background(255);
       p.stroke(0);
@@ -81,20 +91,37 @@ function drawGenerativePages(canvasElement, pageIndex) {
           }
           break;
 
-        case 'grid':
-          p.strokeWeight(1);
-          for (let x = 0; x < p.width; x += 50) {
-            for (let y = 0; y < p.height; y += 50) {
-              if (p.random() > 0.1) {
-                p.ellipse(x, y, 10);
-              }
+        case 'portada-tutorial':
+          p.noStroke();
+          p.fill(0);
+
+          let spacing = 35;
+
+          for (let x = spacing / 2; x < p.width; x += spacing) {
+            for (let y = spacing / 2; y < p.height; y += spacing) {
+              let distance = p.dist(x, y, p.width / 2, p.height / 2);
+              let radius = p.map(p.sin(distance * 0.015), -1, 1, 3, spacing * 0.9);
+              p.circle(x, y, radius);
+            }
+          }
+          break;
+
+        case 'separador':
+          p.noStroke();
+          p.fill(0);
+          let grid = 40;
+
+          for (let x = grid / 2; x < p.width; x += grid) {
+            for (let y = grid / 2; y < p.height; y += grid) {
+              let ondaX = p.sin(x * 0.015);
+              let ondaY = p.cos(y * 0.05);
+              let radio = p.map(ondaX * ondaY, -1, 1, 1, grid * 0.9);
+              p.circle(x, y, radio);
             }
           }
           break;
 
         default:
-          // Fallback
-          // p.text(`Page ${pageIndex}`, 50, 50);
           break;
       }
     };
@@ -112,7 +139,7 @@ window.startZine = function () {
 
     afterPageLayout(pageElement, page, breakToken) {
       // Look for the canvas class on EVERY page created
-      const canvas = pageElement.querySelector('.generative-canvas');
+      const canvas = pageElement.querySelector('.generative-canvas, .generative-separator');
       if (canvas) {
         drawGenerativePages(canvas, page.position);
       }

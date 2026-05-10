@@ -40,6 +40,30 @@
                 "items": []
             },
             {
+                "id": 1778104157189,
+                "label": "Tutorial crossmedia",
+                "title": "",
+                "type": "page",
+                "target": "_self",
+                "rel": "",
+                "link": 9,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            },
+            {
+                "id": 1778104173444,
+                "label": "Fanzine crossmedia",
+                "title": "",
+                "type": "page",
+                "target": "_self",
+                "rel": "",
+                "link": 10,
+                "cssClass": "",
+                "isHidden": false,
+                "items": []
+            },
+            {
                 "id": 1775435599789,
                 "label": "Repositorio",
                 "title": "",

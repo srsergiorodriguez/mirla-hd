@@ -5,9 +5,10 @@
   <meta charset="utf-8">
   <title>{{title}} - {{@website.name}}</title>
 
+  {{!-- Load google fonts --}}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Libre+Franklin:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Syne:wght@400..800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -15,9 +16,10 @@
       --page-height: 8.1in;
 
       /* Typography Variables */
-      --font-body: 'EB Garamond', serif;
-      --font-heading: 'Libre Franklin', sans-serif;
+      --font-body: "IBM Plex Sans", sans-serif;
+      --font-heading: "Syne", sans-serif;
       --font-code: 'Source Code Pro', monospace;
+      --size-code: 8pt;
     }
 
     img, canvas {
@@ -56,11 +58,11 @@
       margin: 20mm 13mm 20mm 13mm;
 
       @top-center {
-        content: "{{@website.name}}";
-        /* Project name */
+        /* Page name name */
+        content: "{{title}}";
         font-family: var(--font-heading);
         font-size: 8pt;
-        color: #666;
+        color: #494949;
       }
 
       @footnote {
@@ -110,9 +112,28 @@
       text-align-last: left;
     }
 
+    pre {
+      white-space: pre-wrap;       /* CSS3 */
+      white-space: -moz-pre-wrap;  /* Mozilla */
+      white-space: -pre-wrap;      /* Opera 4-6 */
+      white-space: -o-pre-wrap;    /* Opera 7 */
+      word-wrap: break-word;       /* IE 5.5+ / Modern browsers */
+      overflow-wrap: break-word;
+      
+      background-color: #d3d3d3;
+      padding: 3mm;
+      
+      font-family: var(--font-code);
+      font-size: var(--size-code);
+      line-height: 1.4;
+      break-inside: avoid; /* Tries to prevent the code block from splitting across two pages */
+    }
+
     code {
       font-family: var(--font-code);
-      font-size: 9pt;
+      font-size: var(--size-code);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     #page-entry p {
@@ -290,6 +311,10 @@
       page: emptypage;
       break-before: page;
       break-after: page;
+      box-sizing: border-box;
+      
+      /* Add a safe white margin (adjust the mm as needed) */
+      padding: 5mm; 
     }
 
     .full-image-page img {
@@ -329,11 +354,11 @@
       break-after: page;
       position: relative;
       display: block; 
-      min-height: 100vh;
+      break-inside: avoid;
     }
 
     /* Ensure all text elements sit on top of the canvas */
-    .canvas-page > *:not(.generative-canvas) {
+    .canvas-page > *:not(.generative-canvas,.generative-separator) {
       position: relative;
       z-index: 10;
     }
@@ -347,38 +372,13 @@
       height: 100%;
       z-index: 1;
     }
-  </style>
 
-  <style data-pagedjs-ignore>
-    /* Style for the floating modal */
-    .zine-instructions {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #fff;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      width: 300px;
-      font-family: "Arial", sans-serif;
-      z-index: 9999;
-    }
-
-    .zine-instructions code {
+    /* Inline Generative Separators */
+    .generative-separator {
       display: block;
-      background: #eee;
-      padding: 8px;
-      margin: 10px 0;
-      font-size: 11px;
-    }
-
-    @media print {
-
-      /* When you hit Ctrl+P, the browser reads this and hides the modal from the PDF */
-      .zine-instructions {
-        display: none !important;
-      }
+      width: 100%;
+      height: 10mm; /* A fixed physical height for print */
+      margin: 2mm 0; /* Breathing room above and below */
     }
   </style>
 </head>
@@ -387,31 +387,12 @@
   <main class="page print-container">
     {{#page}}
     <article>
-      <header class="canvas-page">
-        <canvas class="generative-canvas" data-type="circles"></canvas>
-        <h1>{{title}}</h1>
-      </header>
-
       <div id="page-entry">
         {{{text}}}
       </div>
-
     </article>
     {{/page}}
   </main>
-
-  <div class="zine-instructions">
-    <h3>🖨️ Instrucciones de compaginación para formato fanzine</h3>
-    <p>Este documento está formateado en páginas secuenciales de tamaño <strong>Media Carta</strong>.</p>
-    <ol>
-      <li>Usa el siguiente botón para producir un pdf con las páginas ordenadas secuencialmente: <button
-          onclick="window.print()">Generar PDF Secuencial</button></li>
-      <li>Para generar el formato cuadernillo (o <em>booklet</em>) para impresión física, recomendamos usar la
-        aplicación <a href="https://pdfcpu.io/" target="_blank">pdfcpu</a>. Pon el archivo descargado y pdfcpu en la
-        misma carpeta, y en tu terminal usa el siguiente comando:</li>
-    </ol>
-    <code>pdfcpu booklet fanzine-impreso.pdf tu-archivo-descargado.pdf</code>
-  </div>
 </body>
 
 <script src="{{js "p5.min.js"}}"></script>
