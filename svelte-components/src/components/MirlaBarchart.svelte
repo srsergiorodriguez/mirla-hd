@@ -26,11 +26,30 @@
   let selectedItems = $state([]);
   let activeCategory = $state(null);
 
-  // 4. Data Transformation (Now groups raw items for the ItemsBar)
+  // 4. Data Transformation
   let chartData = $derived.by(() => {
     if (!key || metadata.length === 0) return [];
     
-    const groups = d3.group(metadata, d => d[key]);
+    // Helper to safely extract string values from objects and arrays
+    const getKeyValue = (item, k) => {
+      const val = item[k];
+      if (val === undefined || val === null || val === "") return undefined;
+      
+      // Handle arrays of references
+      if (Array.isArray(val)) {
+        return val.map(v => (typeof v === 'object' && v !== null) ? (v.label || v.pid) : v).join(', ');
+      }
+      
+      // Handle single object references
+      if (typeof val === 'object' && val !== null) {
+        return val.label || val.pid;
+      }
+      
+      // Handle standard primitives
+      return String(val).trim();
+    };
+
+    const groups = d3.group(metadata, d => getKeyValue(d, key));
     let sorted = Array.from(groups, ([k, items]) => ({ key: k, count: items.length, items }))
       .filter(d => d.key !== undefined && d.key !== "" && d.key !== null)
       .sort((a, b) => d3.descending(a.count, b.count));

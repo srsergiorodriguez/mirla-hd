@@ -22,9 +22,29 @@
   let hoveredCategory = $state(null);
 
   const splitValues = (val) => {
-    if (val === null || val === undefined) return [];
-    if (typeof val !== 'string') return [String(val)];
-    return val.split(/[;,]+/).map(s => s.trim()).filter(s => s !== "");
+    if (val === null || val === undefined || val === "") return [];
+
+    // 1. Handle arrays (e.g., multiple references)
+    if (Array.isArray(val)) {
+      return val.map(v => {
+        if (typeof v === 'object' && v !== null) return String(v.label || v.pid).trim();
+        return String(v).trim();
+      }).filter(s => s !== "");
+    }
+
+    // 2. Handle single object references
+    if (typeof val === 'object' && val !== null) {
+      const strVal = String(val.label || val.pid).trim();
+      return strVal !== "" ? [strVal] : [];
+    }
+
+    // 3. Handle standard strings (which might be comma/semicolon separated)
+    if (typeof val === 'string') {
+      return val.split(/[;,]+/).map(s => s.trim()).filter(s => s !== "");
+    }
+
+    // 4. Handle numbers or other primitives
+    return [String(val).trim()];
   };
 
   let chartData = $derived.by(() => {
