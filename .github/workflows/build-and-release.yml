@@ -46,11 +46,15 @@ jobs:
           files: |
             mirlaTheme.zip
             mirlaPlugin.zip
+            MirlaDataEditor.html
           tag_name: ${{ env.TAG_NAME }}
           name: ${{ env.RELEASE_NAME }}
           body: |
             ### 📦 Installation Files
             To use this environment, please download both **`mirlaTheme.zip`** and **`mirlaPlugin.zip`** from the Assets section below.
+            
+            ### 🛠️ Mirla Data Editor
+            Also included in this release is the **`MirlaDataEditor.html`** file. You can download and open this single file directly in your browser to structure, edit, and export your collection's data and images before publishing.
             
             ### 📖 Documentation
             For complete installation instructions, data structuring guidelines, and a list of interactive components, please check the [main repository README](../../).

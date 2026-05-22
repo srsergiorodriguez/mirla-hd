@@ -10,11 +10,13 @@ Sigue esta guía para instalar el *tema*, estructurar los datos de tu colección
   - [Instalar el tema](#instalar-el-tema)
   - [Colecciones digitales](#colecciones-digitales)
     - [1. Preparar los archivos de tu colección](#1-preparar-los-archivos-de-tu-colección)
-      - [A. `Protocol.csv`](#a-protocolcsv)
-      - [B. `Metadata.csv`](#b-metadatacsv)
-      - [C. La carpeta de imágenes (`images`)](#c-la-carpeta-de-imágenes-images)
-      - [D. Otros medios](#d-otros-medios)
-      - [E. Tablas secundarias (Bases de datos relacionales)](#e-tablas-secundarias-bases-de-datos-relacionales)
+      - [Opción Recomendada: El Editor de Datos Mirla (Herramienta Gráfica)](#opción-recomendada-el-editor-de-datos-mirla-herramienta-gráfica)
+      - [Construir los datos manualmente](#construir-los-datos-manualmente)
+        - [A. `Protocol.csv`](#a-protocolcsv)
+        - [B. `Metadata.csv`](#b-metadatacsv)
+        - [C. La carpeta de imágenes (`images`)](#c-la-carpeta-de-imágenes-images)
+        - [D. Otros medios](#d-otros-medios)
+        - [E. Tablas secundarias (Bases de datos relacionales)](#e-tablas-secundarias-bases-de-datos-relacionales)
     - [2. Instalar y configurar el plugin](#2-instalar-y-configurar-el-plugin)
       - [Instalación](#instalación)
       - [Crear la plantilla de ítem](#crear-la-plantilla-de-ítem)
@@ -48,9 +50,29 @@ El tema de Mirla contiene el estilo visual y las plantillas de página especiali
 ## Colecciones digitales
 
 ### 1. Preparar los archivos de tu colección
-Todos los datos y archivos multimedia de tu colección deben ponerse en la carpeta `input/media/files/collection` dentro de la carpeta de tu sitio en Publii. Los datos deben estar organizados exactamente de la siguiente manera:
+Todos los datos y archivos multimedia de tu colección deben ponerse en la carpeta `input/media/files/collection` dentro de la carpeta de tu sitio en Publii.
 
-#### A. `Protocol.csv`
+#### Opción Recomendada: El Editor de Datos Mirla (Herramienta Gráfica)
+
+En lugar de crear los archivos CSV y gestionar las carpetas manualmente, puedes utilizar el Editor de Datos Mirla, una aplicación web gráfica incluida en los archivos de lanzamiento (releases).
+
+Esta herramienta es un único archivo HTML (MirlaDataEditor.html) que puedes abrir directamente en cualquier navegador de internet sin necesidad de instalación. El editor te permite:
+
+- *Crear visualmente tu protocolo y metadatos*: añadir atributos, seleccionar tipos de datos mediante menús desplegables y llenar la información en una tabla interactiva (con validación de PIDs duplicados).
+
+- *Gestión inteligente de imágenes*: cuenta con una pestaña de Galería donde puedes arrastrar tus fotos. El sistema vinculará automáticamente las imágenes a los ítems si el nombre del archivo coincide con el pid (ej. OBJ-001.jpg se vincula a OBJ-001). Si arrastras una carpeta completa nombrada con un pid, el sistema creará automáticamente una galería de múltiples imágenes para ese ítem.
+
+- *Importación*: puedes cargar archivos CSV previos para continuar trabajando sobre ellos.
+
+- *Compresión y exportación a Publii*: Al finalizar, el editor comprime automáticamente tus imágenes al formato optimizado para web (WebP) y genera un archivo Mirla_Collection.zip. Solo debes extraer el contenido de este ZIP directamente en la ruta `input/media/files/collection/` de tu sitio en Publii.
+
+*Nota: La herramienta también te permite guardar y cargar tu progreso localmente mediante archivos JSON. Sin embargo, por seguridad del navegador, los archivos JSON no guardan las imágenes; al cargar un proyecto previo, deberás arrastrar nuevamente tu carpeta de imágenes a la Galería para reconectarlas.*
+
+#### Construir los datos manualmente
+
+Si prefieres usar el Editor de Datos Mirla, puedes saltarte los pasos A, B y C a continuación. Si prefieres construir tu colección manualmente usando Excel, Google Sheets o editores de texto plano, sigue estas reglas exactas:
+
+##### A. `Protocol.csv`
 Este archivo funciona como el protocolo que define los atributos principales de los ítems de tu colección. Debe contener exactamente dos encabezados: `Attribute` y `Type` (escritos exactamente así, incluyendo mayúsculas). Cada fila define un campo de metadatos y le indica a Mirla cómo mostrarlo en la tabla de metadatos del ítem.
 
 Los Tipos (**Types**) disponibles incluyen:
@@ -66,23 +88,23 @@ Los Tipos (**Types**) disponibles incluyen:
 * **`ref:[NombreTabla]`**: Referencias a una tabla relacional secundaria. Por ejemplo, `ref:Tecnica` conectará automáticamente este atributo con los ítems definidos en `Metadata_Tecnica.csv`.
 * **`latlong`**: Coordenadas geográficas formateadas como `"latitud, longitud"` (ej. `"4.7110, -74.0721"`). Se usa para mapas.
 
-#### B. `Metadata.csv`
+##### B. `Metadata.csv`
 Esta es la hoja de cálculo maestra que contiene los datos principales de tu colección. Debe tener una fila para cada ítem de la colección.
 
 * Los encabezados de este CSV **deben coincidir exactamente** con los nombres de la columna `Attribute` definidos en tu `Protocol.csv` (ten cuidado con las mayúsculas/minúsculas y los espacios al final).
 * Los campos `pid` y `label` son estrictamente obligatorios para cada ítem.
 * Si los encabezados no coinciden, la generación de las páginas individuales de los ítems fallará.
 
-#### C. La carpeta de imágenes (`images`)
+##### C. La carpeta de imágenes (`images`)
 Esta carpeta contiene los recursos visuales para cada ítem de la colección.
 
 * **Imágenes individuales:** Coloca archivos `.jpg` o `.png` individuales nombrados exactamente igual que el PID del ítem (ej. `item001.jpg`).
 * **Múltiples imágenes:** Crea una subcarpeta nombrada exactamente igual que el pid del ítem (ej. una carpeta llamada `item001`). Coloca todas las imágenes dentro de esta carpeta. Se mostrarán en la galería del ítem en orden alfabético.
 
-#### D. Otros medios
+##### D. Otros medios
 * Como es posible incluir múltiples tipos de medios (como audio y video) en las tablas de metadatos, estos archivos multimedia deben colocarse directamente en la carpeta principal `collection`, preferiblemente en una subcarpeta, aunque **no** en la carpeta de imágenes. Asegúrate de que los nombres de los archivos correspondan exactamente a lo que referencias en tus metadatos (relativo a la carpeta collection).
 
-#### E. Tablas secundarias (Bases de datos relacionales)
+##### E. Tablas secundarias (Bases de datos relacionales)
 Si tu colección es más compleja y necesitas conectar diferentes tipos de ítem sin repetir información (por ejemplo, múltiples publicaciones que comparten las mismas técnicas o autores), Mirla te permite usar tablas secundarias.
 
 * Crea pares de archivos añadiendo un guion bajo y el nombre de la nueva categoría: ej. `Protocol_Tecnica.csv` y `Metadata_Tecnica.csv`.
@@ -276,7 +298,7 @@ Además de esto, aquí están los problemas más comunes y cómo solucionarlos:
 * El deslizador de comparación requiere al menos dos imágenes para funcionar. Si solo pasas un PID (`pid1="item001"`), la carpeta de ese ítem específico *debe* contener al menos dos imágenes. Si solo tiene una, el componente mostrará un mensaje de error.
 
 **6. "El plugin no reconoce los metadatos."**
-* Asegúrate de que el software que utilizaste para construir la tabla `Metadata.csv` en efecto exporta una tabla de columnas separadas por comas. Excel en español suele separar las columnas por punto y coma, lo que rompe el formato y produce errores. Recomiendo usar programas consistentes, como Google Sheets u Onlyoffice.
+* Asegúrate de que el software que utilizaste para construir la tabla `Metadata.csv` en efecto exporta una tabla de columnas separadas por comas. Excel en español suele separar las columnas por punto y coma, lo que rompe el formato y produce errores. Recomiendo usar el Editor de Datos Mirla incluido en el lanzamiento para evitar estos problemas, o usar programas consistentes como Google Sheets u Onlyoffice.
 
 **7. "La visualización no cuenta los datos de manera correcta."**
 * Al construir tus tablas, intenta mantener la consistencia en tus valores categóricos. Los visualizadores tratan `"Impresión"`, `"impresión"`, y `"Impresión "` como tres categorías completamente diferentes. ¡Usar un programa de hojas de cálculo para gestionar tus CSVs antes de ponerlos en la carpeta `collection` puede ayudarte a detectar estas inconsistencias a tiempo!

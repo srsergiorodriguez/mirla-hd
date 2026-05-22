@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Datos Mirla</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    /* Global Font Scale */
+    html { font-size: 18px; } 
+    body { padding: 0; background-color: var(--pico-background-color); transition: background-color 0.3s; }
+    
+    /* Native App Topbar Style */
+    .menu-bar { display: flex; justify-content: space-between; align-items: center; background-color: var(--pico-card-background-color); padding: 0 1rem; border-bottom: 1px solid var(--pico-muted-border-color); margin-bottom: 2rem; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05); gap: 0.5rem; }
+    .menu-group { display: flex; gap: 0.2rem; align-items: center; }
+    
+    /* Pico Dropdown Overrides for Menu Bar */
+    details.dropdown { margin-bottom: 0; position: relative; }
+    details.dropdown summary { padding: 0.5rem 0.8rem; font-size: 0.8rem; font-weight: 500; color: var(--pico-color); background: transparent; border: none; border-radius: 0; margin-bottom: 0; }
+    details.dropdown summary:hover, details.dropdown[open] summary { background-color: var(--pico-form-element-background-color); }
+    details.dropdown summary::after { margin-left: 0.4rem; border-top-color: var(--pico-muted-color); }
+    
+    details.dropdown ul { font-size: 0.8rem; min-width: 220px; padding: 0.25rem; z-index: 100; box-shadow: var(--pico-card-box-shadow); top: 100%; margin-top: 0; border: 1px solid var(--pico-muted-border-color); border-radius: 0 0 0.25rem 0.25rem; }
+    
+    /* Dropdown Alignment Fixes */
+    .dropdown-left ul { left: 0; right: auto; }
+    .dropdown-right ul { right: 0; left: auto; }
+    
+    details.dropdown ul li { padding: 0; }
+    details.dropdown ul li a, details.dropdown ul li label { display: block; padding: 0.5rem 0.8rem; cursor: pointer; color: var(--pico-color); border-radius: 0.2rem; text-decoration: none; margin: 0; font-weight: normal; }
+    details.dropdown ul li a:hover, details.dropdown ul li label:hover { background-color: var(--pico-primary); color: var(--pico-primary-inverse); }
+    
+    /* Direct Action Buttons in Menu */
+    .btn-direct { padding: 0.5rem 0.8rem; font-size: 0.8rem; font-weight: 500; cursor: pointer; text-decoration: none; border: none; background: transparent; color: var(--pico-color); }
+    .btn-direct:hover { background-color: var(--pico-form-element-background-color); }
+    .btn-export { background: var(--pico-primary); color: var(--pico-primary-inverse); font-weight: 600; padding: 0.3rem 0.8rem; margin: 0.2rem 0; border-radius: 0.2rem; }
+    .btn-export:hover { background: var(--pico-primary-hover); }
+
+    /* Header Controls (Title area inside container) */
+    .header-controls { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .header-controls h1 { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--pico-h1-color); }
+
+    /* Tabs */
+    .tabs-container { display: flex; justify-content: flex-start; align-items: flex-end; gap: 0.2rem; border-bottom: 2px solid var(--pico-primary); margin-bottom: 1.5rem; overflow-x: auto; padding-left: 0.5rem; }
+    .tab { padding: 0.4rem 1rem; cursor: pointer; border: 1px solid transparent; border-bottom: none; border-radius: 0.3rem 0.3rem 0 0; background: transparent; font-size: 0.85rem; color: var(--pico-muted-color); transition: all 0.2s; white-space: nowrap; margin-bottom: -2px; }
+    .tab:hover { background: var(--pico-form-element-background-color); color: var(--pico-h1-color); }
+    .tab.active { background: var(--pico-card-background-color); border-color: var(--pico-primary); border-bottom: 2px solid var(--pico-card-background-color); color: var(--pico-primary); font-weight: 600; }
+    .tab-add { color: var(--pico-primary); font-weight: normal; opacity: 0.8; }
+    
+    /* Sections */
+    .section-card { border: 1px solid var(--pico-muted-border-color); border-radius: 0.25rem; padding: 1rem; margin-bottom: 1.5rem; }
+    .card-protocol { background-color: var(--pico-form-element-background-color); box-shadow: inset 0 1px 3px rgba(0,0,0,0.02); }
+    .card-metadata { background-color: var(--pico-card-background-color); box-shadow: var(--pico-card-box-shadow); }
+    .card-gallery { background-color: var(--pico-background-color); border-style: dashed; border-width: 2px; text-align: center; padding: 2rem 1rem; transition: background 0.2s; }
+    .card-gallery.dragover { background-color: var(--pico-form-element-background-color); border-color: var(--pico-primary); }
+
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--pico-muted-border-color); }
+    .section-header h3 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--pico-h1-color); }
+
+    /* Tables & Inputs */
+    .btn-action { font-size: 0.75rem; padding: 0.2rem 0.6rem; width: auto; margin: 0; }
+    .btn-delete { background-color: #d81b60; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 0.2rem; cursor: pointer; transition: background 0.2s; }
+    .btn-delete:hover { background-color: #c2185b; }
+    .table-wrapper { overflow-x: auto; max-width: 100%; border: 1px solid var(--pico-muted-border-color); border-radius: 0.25rem; background-color: var(--pico-background-color); }
+    table { font-size: 0.75rem; margin-bottom: 0; white-space: nowrap; border-collapse: separate; border-spacing: 0; }
+    th { background-color: var(--pico-form-element-background-color); font-weight: 600; color: var(--pico-color); border-bottom: 1px solid var(--pico-muted-border-color); }
+    th, td { padding: 0.25rem 0.4rem; vertical-align: middle; border-bottom: 1px solid var(--pico-muted-border-color); }
+    input, select { font-size: 0.75rem !important; padding: 0.15rem 0.3rem !important; height: 1.6rem !important; margin-bottom: 0 !important; border-radius: 0.2rem !important; }
+    .prefix-input { width: 80px !important; }
+    .fixed-text { color: var(--pico-muted-color); font-weight: 600; padding: 0.15rem 0.3rem; display: inline-block; background: var(--pico-form-element-disabled-background-color); border-radius: 0.2rem; font-family: monospace; font-size: 0.7rem; border: 1px solid var(--pico-muted-border-color); }
+    .sticky-col { position: sticky; right: 0; background-color: var(--pico-background-color); z-index: 2; border-left: 2px solid var(--pico-muted-border-color); text-align: center; }
+    th.sticky-col { background-color: var(--pico-form-element-background-color); z-index: 3; }
+    
+    .pagination-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.75rem; color: var(--pico-muted-color); }
+    .pagination-controls { display: flex; gap: 0.4rem; align-items: center; }
+    .pagination-controls button { padding: 0.1rem 0.4rem; font-size: 0.75rem; margin: 0; width: auto; }
+    .per-page-select { width: auto !important; min-width: 3.5rem; display: inline-block; padding: 0.1rem 1.2rem 0.1rem 0.3rem !important; margin-left: 0.3rem !important; height: auto !important; }
+
+    /* Image System UI */
+    .pid-cell-group { display: flex; align-items: center; gap: 0.3rem; }
+    .pid-cell-group input { flex-grow: 1; min-width: 90px; }
+    .multi-img-container { position: relative; display: inline-block; cursor: pointer; }
+    .mini-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 0.2rem; border: 1px solid var(--pico-muted-border-color); background: var(--pico-card-background-color); display: block; }
+    .mini-thumb:hover { border-color: var(--pico-primary); }
+    .multi-badge { position: absolute; bottom: -4px; right: -4px; background: var(--pico-primary); color: var(--pico-primary-inverse); font-size: 0.55rem; padding: 0.1rem 0.25rem; border-radius: 10px; font-weight: bold; pointer-events: none; }
+    .btn-img-add { padding: 0 0.3rem !important; height: 28px !important; font-size: 0.7rem !important; display: flex; align-items: center; justify-content: center; margin: 0 !important;}
+    
+    .img-cell-preview { display: flex; align-items: center; gap: 0.4rem; background: var(--pico-form-element-background-color); padding: 0.15rem; border-radius: 0.2rem; border: 1px solid var(--pico-muted-border-color); }
+    .img-cell-preview img { height: 20px; width: 20px; object-fit: cover; border-radius: 0.1rem; cursor: pointer; }
+    .img-cell-preview span { font-size: 0.65rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+    dialog article { max-width: 800px; width: 90vw; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.8rem; max-height: 50vh; overflow-y: auto; padding: 1rem 0; }
+    .gallery-item { border: 2px solid transparent; border-radius: 0.25rem; overflow: hidden; cursor: pointer; text-align: center; transition: transform 0.1s; position: relative; }
+    .gallery-item:hover { border-color: var(--pico-primary); transform: scale(1.02); }
+    .gallery-item.selected { border-color: var(--pico-primary); box-shadow: 0 0 0 2px var(--pico-primary); }
+    .gallery-item.selected::after { content: "✓"; position: absolute; top: 4px; right: 4px; background: var(--pico-primary); color: var(--pico-primary-inverse); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; }
+    .gallery-item img { width: 100%; height: 90px; object-fit: cover; display: block; }
+    .gallery-item span { font-size: 0.65rem; display: block; padding: 0.2rem; background: var(--pico-card-background-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; }
+    
+    .hidden { display: none !important; }
+    .duplicate-warning { color: #d81b60; font-size: 0.65rem; display: block; margin-top: 0.1rem; font-weight: bold; }
+
+    /* Progress & Help Modal */
+    #progress-modal article { max-width: 400px; text-align: center; }
+    progress { margin-top: 1rem; }
+    
+    /* Help Markdown Styling */
+    .help-section { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--pico-muted-border-color); }
+    .help-section:last-child { border-bottom: none; }
+    .help-section h4 { font-size: 1rem; margin-bottom: 0.4rem; color: var(--pico-primary); }
+    .help-section p { font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--pico-color); line-height: 1.4; }
+    .help-section ul { font-size: 0.8rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .help-section li { margin-bottom: 0.2rem; }
+    code { font-size: 0.75rem; padding: 0.1rem 0.3rem; }
+    
+    /* Grouping types for the ref selector */
+    .type-selector-group { display: flex; align-items: center; gap: 0.3rem; }
+
+    /* Uniform menu item styling */
+    .menu-item-link {
+      padding: 0.1rem 0.5rem !important;
+      text-align: left !important;
+      cursor: pointer !important;
+      color: var(--pico-color) !important;
+      background: transparent !important;
+      font-weight: normal !important;
+      margin: 0 !important;
+    }
+
+    .menu-item-link:hover {
+      background: var(--pico-muted-border-color) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <nav class="menu-bar">
+    <div class="menu-group">
+      <details class="dropdown dropdown-left">
+        <summary data-i18n="menu_project">Proyecto</summary>
+        <ul>
+          <li>
+              <label for="file-upload" data-i18n="load_json" class="menu-item-link">Cargar proyecto (JSON)</label>
+              <input type="file" id="file-upload" accept=".json" style="display: none;" onchange="importProject(event)">
+          </li>
+          <li><a href="#" onclick="event.preventDefault(); exportProject();" data-i18n="save_json">Guardar proyecto (JSON)</a></li>
+        </ul>
+      </details>
+
+      <details class="dropdown dropdown-left">
+        <summary data-i18n="menu_data">Datos</summary>
+        <ul>
+          <li>
+              <label for="csv-upload" data-i18n="import_csv" class="menu-item-link">Importar tabla individual (CSV)</label>
+              <input type="file" id="csv-upload" accept=".csv" multiple style="display: none;" onchange="importCSVs(event)">
+          </li>
+        </ul>
+      </details>
+
+      <details class="dropdown dropdown-left" id="dropdown-export">
+        <summary data-i18n="menu_export">Exportación</summary>
+        <ul>
+          <li><a href="#" onclick="event.preventDefault(); setExportMode('webp');" id="opt-webp">✓ Compresión de imágenes: WebP (HD)</a></li>
+          <li><a href="#" onclick="event.preventDefault(); setExportMode('raw');" id="opt-raw">Compresión de imágenes: Originales</a></li>
+        </ul>
+      </details>
+
+      <details class="dropdown dropdown-left">
+        <summary data-i18n="menu_prefs">Preferencias</summary>
+        <ul>
+          <li><a href="#" onclick="event.preventDefault(); toggleLang();" id="lang-toggle-text">Lenguaje: Español</a></li>
+          <li><a href="#" onclick="event.preventDefault(); toggleTheme();" id="theme-toggle-text">Tema: Oscuro</a></li>
+        </ul>
+      </details>
+    </div>
+    
+    <div class="menu-group">
+      <button class="btn-direct" onclick="document.getElementById('help-modal').showModal()" data-i18n="help">Ayuda</button>
+      <button class="btn-direct btn-export" onclick="exportCSVs()" data-i18n="dl_zip">Descargar Colección (ZIP)</button>
+    </div>
+  </nav>
+
+  <input type="hidden" id="export-mode" value="webp">
+
+  <main class="container-fluid">
+    <div class="header-controls">
+      <h1 data-i18n="title">Editor de Datos Mirla</h1>
+    </div>
+    
+    <nav class="tabs-container" id="tabs-container"></nav>
+
+    <div id="content-tables">
+      <div class="section-card card-protocol">
+        <div class="section-header">
+          <h3 data-i18n="schema">Protocolo (Esquema)</h3>
+          <button class="secondary outline btn-action" onclick="addProtocolField()" data-i18n="add_attr">+ Añadir Atributo</button>
+        </div>
+        <div class="table-wrapper">
+          <table id="protocol-table">
+            <thead>
+              <tr>
+                <th style="min-width: 150px;" data-i18n="attr_name">Nombre de Atributo</th>
+                <th style="min-width: 220px;" data-i18n="data_type">Tipo de Dato</th>
+                <th style="width: 100%;" data-i18n="desc">Descripción</th>
+                <th class="sticky-col" data-i18n="actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar" id="protocol-pagination-bar">
+          <div>
+            <span id="protocol-page-info"></span>
+            <label> <span data-i18n="per_page">Por pág:</span>
+              <select class="per-page-select" onchange="changeProtocolPerPage(this.value)">
+                <option value="10">10</option>
+                <option value="all" data-i18n="all">Todos</option>
+              </select>
+            </label>
+          </div>
+          <div class="pagination-controls">
+            <button class="secondary outline" onclick="changeProtocolPage(-1)" id="protocol-btn-prev" data-i18n="prev">Anterior</button>
+            <span id="protocol-page-current"></span>
+            <button class="secondary outline" onclick="changeProtocolPage(1)" id="protocol-btn-next" data-i18n="next">Siguiente</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card card-metadata">
+        <div class="section-header">
+          <h3 data-i18n="items">Metadatos (Ítems)</h3>
+          <div style="display:flex; gap:0.5rem;">
+             <input type="text" id="pid-prefix" class="prefix-input" data-i18n="prefix_placeholder" placeholder="Prefijo (OBJ-)" value="">
+             <button class="secondary outline btn-action" onclick="addMetadataRow()" data-i18n="add_item">+ Añadir Ítem</button>
+          </div>
+        </div>
+        
+        <div class="table-wrapper">
+          <table id="metadata-table">
+            <thead><tr></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar" id="metadata-pagination-bar">
+          <div>
+            <span id="metadata-page-info"></span>
+            <label> <span data-i18n="per_page">Por pág:</span>
+              <select class="per-page-select" onchange="changeMetadataPerPage(this.value)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="all" data-i18n="all">Todos</option>
+              </select>
+            </label>
+          </div>
+          <div class="pagination-controls">
+            <button class="secondary outline" onclick="changeMetadataPage(-1)" id="metadata-btn-prev" data-i18n="prev">Anterior</button>
+            <span id="metadata-page-current"></span>
+            <button class="secondary outline" onclick="changeMetadataPage(1)" id="metadata-btn-next" data-i18n="next">Siguiente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="content-gallery" class="hidden">
+      <div class="section-card card-gallery" id="dropzone">
+        <h3 data-i18n="drop_title" style="margin-bottom: 0.5rem;">Arrastra imágenes o carpetas aquí</h3>
+        <p style="color: var(--pico-muted-color); font-size: 0.85rem;" data-i18n="drop_desc">El sistema vinculará imágenes por nombre de archivo, o galerías por nombre de carpeta.</p>
+        <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem;">
+            <button class="secondary btn-action" onclick="document.getElementById('img-upload-input').click()" data-i18n="select_files">Archivos</button>
+            <button class="secondary outline btn-action" onclick="document.getElementById('folder-upload-input').click()" data-i18n="select_folder">Carpetas</button>
+        </div>
+        <input type="file" id="img-upload-input" multiple accept="image/*" style="display: none;" onchange="handleImageInput(event)">
+        <input type="file" id="folder-upload-input" webkitdirectory directory multiple style="display: none;" onchange="handleImageInput(event)">
+      </div>
+      
+      <div class="section-header">
+        <h3 data-i18n="loaded_imgs">Imágenes Cargadas en Memoria</h3>
+        <span id="img-count-badge" style="background:var(--pico-primary); color:var(--pico-primary-inverse); padding:0.15rem 0.4rem; border-radius:1rem; font-size:0.75rem; font-weight:bold;">0</span>
+      </div>
+      <div class="gallery-grid" id="main-gallery-grid"></div>
+    </div>
+
+  </main>
+
+  <dialog id="help-modal">
+    <article style="max-width: 700px; width: 90vw;">
+      <header>
+        <a href="#close" aria-label="Close" class="close" onclick="document.getElementById('help-modal').close()"></a>
+        <strong data-i18n="help_title">Guía Práctica: Editor de Datos Mirla</strong>
+      </header>
+      <div style="max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+        
+        <div class="help-section">
+            <h4 data-i18n="help_s1_t">1. Configurar el Protocolo</h4>
+            <p data-i18n="help_s1_d">El protocolo define qué campos conformarán tu colección. Los atributos <code>pid</code> (Identificador único) y <code>label</code> (Nombre legible) son obligatorios y no pueden ser eliminados o modificados en su tipo.</p>
+            <p data-i18n="help_s1_d2">Al añadir nuevos atributos, asegúrate de seleccionar el tipo correcto. Los tipos de datos válidos son:</p>
+            <ul>
+                <li data-i18n="help_t_text"><code>text</code>: Cadenas de texto estándar.</li>
+                <li data-i18n="help_t_num"><code>number</code>: Valores numéricos (ej. precios, cantidades).</li>
+                <li data-i18n="help_t_date"><code>date</code>: Datos cronológicos (ej. 2024 o 2024-05-22).</li>
+                <li data-i18n="help_t_link"><code>link</code>: URLs externas o internas.</li>
+                <li data-i18n="help_t_youtube"><code>youtube</code>: ID de video de YouTube o URL para incrustar.</li>
+                <li data-i18n="help_t_media"><code>image</code> / <code>video</code> / <code>audio</code>: Archivos multimedia asociados.</li>
+                <li data-i18n="help_t_geo"><code>latlong</code>: Coordenadas geográficas ("latitud, longitud"). Se usa para mapas.</li>
+                <li data-i18n="help_t_ref"><code>ref</code>: Referencias cruzadas a otros ítems (usando PIDs separados por comas). Si seleccionas <code>ref</code>, aparecerá un menú secundario para elegir si la referencia apunta a la Colección Principal o a un Grupo Secundario.</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h4 data-i18n="help_s2_t">2. Ingresar Metadatos</h4>
+            <p data-i18n="help_s2_d">Añade filas en la tabla de Metadatos. Cada fila es un ítem de tu colección. El sistema marcará en rojo cualquier PID que esté duplicado, ya que deben ser estrictamente únicos.</p>
+        </div>
+
+        <div class="help-section">
+            <h4 data-i18n="help_s3_t">3. Gestión de Imágenes</h4>
+            <p data-i18n="help_s3_d">Para asociar imágenes a los ítems, dirígete a la pestaña "Galería de Imágenes" y carga tus archivos. La aplicación mantendrá los archivos en memoria y buscará coincidencias automáticamente:</p>
+            <ul>
+                <li data-i18n="help_i_single"><strong>Imagen Única:</strong> Si un archivo tiene exactamente el nombre del PID (ej. <code>OBJ-001.jpg</code>), se asignará automáticamente como imagen principal.</li>
+                <li data-i18n="help_i_multi"><strong>Galerías por Carpeta:</strong> Si cargas una carpeta cuyo nombre es el PID (ej. carpeta <code>OBJ-001/</code>), todas las imágenes dentro de ella formarán una galería para ese ítem.</li>
+                <li data-i18n="help_i_manual"><strong>Asignación Manual:</strong> Puedes hacer clic en el botón "+ Img" en la tabla de metadatos para abrir un selector y asignar imágenes manualmente.</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h4 data-i18n="help_s4_t">4. Crear Grupos Secundarios</h4>
+            <p data-i18n="help_s4_d">Puedes crear tablas relacionales usando el botón "+ Grupo". Por ejemplo, un grupo "Tecnica". Luego, en el protocolo de la colección principal, podrás crear un atributo de tipo <code>ref</code> apuntando a la tabla "Tecnica". Esto conectará automáticamente los ítems.</p>
+        </div>
+
+        <div class="help-section">
+            <h4 data-i18n="help_s5_t">5. Cargar e Importar</h4>
+            <ul>
+                <li data-i18n="help_io_json"><strong>Cargar proyecto (JSON):</strong> Restaura el estado completo de tus tablas. <strong>Importante:</strong> Las imágenes no se guardan en este archivo. Tras cargar un JSON, debes volver a cargar tus imágenes en la Galería para reconectarlas.</li>
+                <li data-i18n="help_io_csv"><strong>Importar tabla (CSV):</strong> Permite importar datos existentes. El sistema detecta automáticamente si el CSV corresponde a un Protocolo (si contiene las columnas 'Attribute' y 'Type') o a Metadatos.</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h4 data-i18n="help_s6_t">6. Exportación final para Publii</h4>
+            <p data-i18n="help_s6_d">Asegúrate de seleccionar la compresión adecuada en el menú (WebP es altamente recomendado para reducir el peso en sitios estáticos). Haz clic en "Descargar Colección (ZIP)".</p>
+            <p data-i18n="help_s6_d2">Para integrar los datos en Mirla, extrae el contenido del ZIP descargado (los archivos CSV y la carpeta /images). Debes colocar estos archivos y carpetas <strong>sin comprimir</strong> exactamente en la siguiente ruta dentro de tu repositorio o sitio de Publii:</p>
+            <code style="display:block; padding: 0.5rem; background: var(--pico-form-element-background-color); margin-top: 0.5rem; word-break: break-all;">
+                Publii/[carpeta_de_tu_sitio]/input/media/files/collection/
+            </code>
+        </div>
+      </div>
+    </article>
+  </dialog>
+
+  <dialog id="image-modal">
+    <article>
+      <header><strong data-i18n="select_imgs">Asignar Imágenes</strong></header>
+      <div style="margin-bottom: 0.5rem;">
+        <button class="secondary outline btn-action" onclick="clearSelectedImage()" data-i18n="clear_img">Quitar Imagen(es)</button>
+      </div>
+      <div class="gallery-grid" id="modal-gallery-grid"></div>
+      <footer>
+        <button class="secondary outline btn-action" onclick="closeImageModal()" data-i18n="cancel">Cancelar</button>
+        <button class="btn-action" onclick="saveModalSelection()" data-i18n="save_sel">Guardar Selección</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog id="progress-modal">
+    <article>
+      <h3 data-i18n="exporting" style="margin-bottom: 0.5rem;">Procesando Colección...</h3>
+      <p id="progress-text" style="color: var(--pico-muted-color); font-size: 0.85rem; margin:0;">Procesando imágenes</p>
+      <progress id="export-progress" value="0" max="100"></progress>
+    </article>
+  </dialog>
+
+  <script>
+    // --- 0. I18N & THEME CONTROLS ---
+    const dict = {
+      es: {
+        title: "Editor de Datos de Mirla", 
+        menu_project: "Proyecto", load_json: "Cargar proyecto (JSON)", save_json: "Guardar proyecto (JSON)",
+        menu_data: "Datos", import_csv: "Importar tabla individual (CSV)",
+        menu_export: "Exportación", opt_webp_check: "✓ Compresión de imágenes: WebP (HD)", opt_webp_uncheck: "Compresión de imágenes: WebP (HD)", opt_raw_check: "✓ Compresión de imágenes: Originales", opt_raw_uncheck: "Compresión de imágenes: Originales",
+        menu_prefs: "Preferencias", pref_lang: "Lenguaje: Español", pref_theme_dark: "Tema: Oscuro", pref_theme_light: "Tema: Claro",
+        help: "Ayuda", dl_zip: "Descargar Colección (ZIP)",
+        
+        schema: "Protocolo (Esquema)", items: "Metadatos (Ítems)", add_attr: "+ Añadir Atributo", add_item: "+ Añadir Ítem", attr_name: "Nombre de Atributo", data_type: "Tipo de Dato", desc: "Descripción", actions: "Acciones", delete: "Borrar", locked: "Fijo", new_tab: "+ Grupo", main_tab: "Colección Principal", tab_gallery: "Galería de Imágenes", prompt_tab: "Nombre del nuevo grupo:", err_tab_exists: "¡La pestaña ya existe!", err_attr_exists: "¡El atributo ya existe!", confirm_del_attr: "¿Eliminar atributo?", err_invalid_proj: "Estructura inválida", err_invalid_file: "Archivo inválido.", showing_attr: "{start}-{end} de {total}", showing_items: "{start}-{end} de {total}", per_page: "Por pág:", all: "Todos", prev: "Anterior", next: "Siguiente", page: "Pág {num}", duplicate_pid: "Duplicado", desc_placeholder: "Describe este campo...", prefix_placeholder: "Prefijo (OBJ-)", uid: "Identificador único", disp_name: "Nombre visible", item_base: "Ítem", file_name_zip: "collection.zip", drop_title: "Arrastra imágenes o carpetas aquí", drop_desc: "El sistema vinculará imágenes únicas por nombre de archivo, o galerías enteras si el nombre de la carpeta coincide con un PID.", loaded_imgs: "Imágenes en Memoria", select_imgs: "Asignar Imágenes", save_sel: "Guardar Selección", cancel: "Cancelar", main_img: "+ Img", select_files: "Seleccionar Archivos", select_folder: "Seleccionar Carpeta", clear_img: "Quitar Imagen(es)", csv_imported: "Importado: {name}",
+        ph_date: "Ej. 2024 o 2024-05-22", ph_latlong: "Lat, Long (ej. 4.71, -74.07)", ph_youtube: "URL o ID del video", ph_ref: "PID1, PID2...",
+        exporting: "Procesando Colección...", prog_img: "Imagen {n} de {total}...", ref_target_main: "Colección Principal",
+        
+        help_title: "Guía Práctica: Editor de Datos Mirla",
+        help_s1_t: "1. Configurar el Protocolo",
+        help_s1_d: "El protocolo define qué campos conformarán tu colección. Los atributos pid (Identificador único) y label (Nombre legible) son obligatorios y no pueden ser eliminados.",
+        help_s1_d2: "Los tipos de datos válidos para Mirla son:",
+        help_t_text: "text: Cadenas de texto estándar.",
+        help_t_num: "number: Valores numéricos (ej. precios, cantidades).",
+        help_t_date: "date: Datos cronológicos (ej. 2024 o 2024-05-22).",
+        help_t_link: "link: URLs externas o internas.",
+        help_t_youtube: "youtube: ID de video de YouTube o URL para incrustar.",
+        help_t_media: "image / video / audio: Archivos multimedia asociados.",
+        help_t_geo: "latlong: Coordenadas geográficas ('latitud, longitud').",
+        help_t_ref: "ref: Referencias cruzadas a otros ítems mediante PIDs separados por comas. Podrás elegir a qué grupo apunta.",
+        help_s2_t: "2. Ingresar Metadatos",
+        help_s2_d: "Añade filas en la tabla. Cada fila es un ítem. El sistema marcará en rojo cualquier PID duplicado. Usa el campo 'Prefijo' para generarlos secuencialmente.",
+        help_s3_t: "3. Gestión de Imágenes",
+        help_s3_d: "Ve a la pestaña 'Galería de Imágenes' y carga tus archivos. La app buscará coincidencias automáticamente:",
+        help_i_single: "Imagen Única: Un archivo llamado OBJ-001.jpg se asignará automáticamente al PID OBJ-001.",
+        help_i_multi: "Galerías por Carpeta: Si cargas una carpeta cuyo nombre es el PID (ej. OBJ-001/), todas las imágenes dentro de ella formarán una galería.",
+        help_i_manual: "Asignación Manual: Haz clic en '+ Img' en la tabla para elegir imágenes manualmente.",
+        help_s4_t: "4. Crear Grupos Secundarios",
+        help_s4_d: "Usa el botón '+ Grupo' para crear tablas relacionales. Luego, en el protocolo principal, crea un atributo de tipo ref apuntando a ese grupo.",
+        help_s5_t: "5. Cargar e Importar",
+        help_io_json: "Cargar proyecto (JSON): Restaura tus tablas. Importante: Las imágenes no se guardan en este archivo. Debes volver a cargar tus imágenes en la Galería para reconectarlas.",
+        help_io_csv: "Importar tabla (CSV): Carga datos existentes. El sistema detecta automáticamente si el CSV es un Protocolo o son Metadatos.",
+        help_s6_t: "6. Exportación final para Publii",
+        help_s6_d: "Selecciona la compresión WebP en el menú 'Exportación' y haz clic en 'Descargar Colección (ZIP)'.",
+        help_s6_d2: "Extrae el contenido del ZIP y colócalo sin comprimir exactamente en la siguiente ruta de tu sitio en Publii:"
+      },
+      en: {
+        title: "Mirla Data Editor", 
+        menu_project: "Project", load_json: "Load project (JSON)", save_json: "Save project (JSON)",
+        menu_data: "Data", import_csv: "Import single table (CSV)",
+        menu_export: "Export Settings", opt_webp_check: "✓ Image Compression: WebP (HD)", opt_webp_uncheck: "Image Compression: WebP (HD)", opt_raw_check: "✓ Image Compression: Original", opt_raw_uncheck: "Image Compression: Original",
+        menu_prefs: "Preferences", pref_lang: "Language: English", pref_theme_dark: "Theme: Dark", pref_theme_light: "Theme: Light",
+        help: "Help", dl_zip: "Download Collection (ZIP)",
+
+        schema: "Protocol (Schema)", items: "Metadata (Items)", add_attr: "+ Add Attribute", add_item: "+ Add Item", attr_name: "Attribute Name", data_type: "Data Type", desc: "Description", actions: "Actions", delete: "Del", locked: "Fixed", new_tab: "+ Group", main_tab: "Main Collection", tab_gallery: "Image Gallery", prompt_tab: "New table group name:", err_tab_exists: "Tab already exists!", err_attr_exists: "Attribute already exists!", confirm_del_attr: "Remove this attribute?", err_invalid_proj: "Invalid structure", err_invalid_file: "Invalid file.", showing_attr: "{start}-{end} of {total}", showing_items: "{start}-{end} of {total}", per_page: "Per page:", all: "All", prev: "Prev", next: "Next", page: "Page {num}", duplicate_pid: "Duplicate", desc_placeholder: "Describe...", prefix_placeholder: "Prefix (OBJ-)", uid: "Unique ID", disp_name: "Display name", item_base: "Item", file_name_zip: "Mirla_Collection.zip", drop_title: "Drop images or folders here", drop_desc: "The app links single images by filename, or entire galleries if the folder name matches a PID.", loaded_imgs: "Images in Memory", select_imgs: "Assign Images", save_sel: "Save Selection", cancel: "Cancel", main_img: "+ Img", select_files: "Select Files", select_folder: "Select Folder", clear_img: "Clear Image(s)", csv_imported: "Imported: {name}",
+        ph_date: "e.g. 2024 or 2024-05-22", ph_latlong: "Lat, Long (4.71, -74.07)", ph_youtube: "URL or Video ID", ph_ref: "PID1, PID2...",
+        exporting: "Processing Collection...", prog_img: "Image {n} of {total}...", ref_target_main: "Main Collection",
+        
+        help_title: "Practical Guide: Mirla Data Editor",
+        help_s1_t: "1. Configure the Protocol",
+        help_s1_d: "The protocol defines the fields for your collection. The pid (unique ID) and label (display name) attributes are mandatory and cannot be deleted.",
+        help_s1_d2: "Valid Mirla data types are:",
+        help_t_text: "text: Standard text strings.",
+        help_t_num: "number: Numeric values (e.g. prices, quantities).",
+        help_t_date: "date: Chronological data (e.g. 2024 or 2024-05-22).",
+        help_t_link: "link: External or internal URLs.",
+        help_t_youtube: "youtube: YouTube video ID or embed URL.",
+        help_t_media: "image / video / audio: Associated media files.",
+        help_t_geo: "latlong: Geographic coordinates ('latitude, longitude').",
+        help_t_ref: "ref: Cross-references to other items using comma-separated PIDs. You will be able to select the target group.",
+        help_s2_t: "2. Entering Metadata",
+        help_s2_d: "Add rows to the table. Each row is an item. The system highlights duplicate PIDs in red. Use 'Prefix' to auto-generate sequential IDs.",
+        help_s3_t: "3. Image Management",
+        help_s3_d: "Go to the 'Image Gallery' tab and load your files. The app keeps them in memory and auto-matches:",
+        help_i_single: "Single Image: A file named OBJ-001.jpg is auto-assigned as the main image for PID OBJ-001.",
+        help_i_multi: "Folder Galleries: If you load a folder named OBJ-001/, all images inside it become a gallery.",
+        help_i_manual: "Manual Assignment: Click '+ Img' in the table to choose images manually.",
+        help_s4_t: "4. Creating Secondary Groups",
+        help_s4_d: "Use the '+ Group' button to create relational tables. Then, in the main protocol, create a ref attribute pointing to that group.",
+        help_s5_t: "5. Load & Import",
+        help_io_json: "Load project (JSON): Restores your tables. Important: Images are not saved in this file. You must reload your images in the Gallery to reconnect them.",
+        help_io_csv: "Import table (CSV): Loads existing data. The system automatically detects if the CSV is a Protocol or Metadata.",
+        help_s6_t: "6. Final Export for Publii",
+        help_s6_d: "Select WebP compression in the Export menu and click 'Download Collection (ZIP)'.",
+        help_s6_d2: "Extract the ZIP and place the uncompressed content exactly in this path inside your Publii site:"
+      }
+    };
+
+    let currentLang = 'es';
+    function t(key) { return dict[currentLang][key] || key; }
+
+    function updateDynamicUI() {
+        document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (dict[currentLang][key]) {
+                if (el.tagName === 'INPUT' && el.type === 'text') el.placeholder = dict[currentLang][key];
+                else if (el.tagName === 'OPTION') el.innerText = dict[currentLang][key];
+                else el.innerText = dict[currentLang][key];
+            }
+        });
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.getElementById('lang-toggle-text').innerText = t('pref_lang');
+        document.getElementById('theme-toggle-text').innerText = isDark ? t('pref_theme_dark') : t('pref_theme_light');
+
+        const expMode = document.getElementById('export-mode').value;
+        document.getElementById('opt-webp').innerText = expMode === 'webp' ? t('opt_webp_check') : t('opt_webp_uncheck');
+        document.getElementById('opt-raw').innerText = expMode === 'raw' ? t('opt_raw_check') : t('opt_raw_uncheck');
+    }
+
+    function toggleLang() { currentLang = currentLang === 'es' ? 'en' : 'es'; updateDynamicUI(); render(); }
+    function toggleTheme() {
+        const html = document.documentElement;
+        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        updateDynamicUI();
+    }
+    function setExportMode(mode) { document.getElementById('export-mode').value = mode; updateDynamicUI(); }
+
+    // --- 1. STATE & DATATYPES ---
+    const baseDataTypes = ['text', 'number', 'date', 'link', 'youtube', 'image', 'video', 'audio', 'latlong', 'ref'];
+    
+    let state = {
+      activeTab: 'main',
+      tabs: ['main'], 
+      data: {
+        'main': {
+          protocol: [
+            { id: 'p_pid', name: 'pid', type: 'pid', desc: dict['es'].uid, fixed: true },
+            { id: 'p_label', name: 'label', type: 'label', desc: dict['es'].disp_name, fixed: true }
+          ],
+          metadata: []
+        }
+      }
+    };
+
+    let imageFiles = new Map();     
+    let imagePreviews = new Map();  
+    let modalTargetRow = null, modalTargetField = null, currentSelection = [];   
+    let protocolPage = 1, protocolPerPage = 10;
+    let metadataPage = 1, metadataPerPage = 10;
+    const generateId = (prefix) => prefix + '_' + Math.random().toString(36).substr(2, 9);
+
+    for(let i=1; i<=3; i++) {
+        state.data['main'].metadata.push({ 
+            id: `m_${i}`, pid: `OBJ-${String(i).padStart(3, '0')}`, label: `${dict['es'].item_base} ${i}`, __main_images: []
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('pid-prefix').value = 'OBJ-';
+        updateDynamicUI(); setupDropzone(); render(); 
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('details.dropdown')) {
+                document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+            }
+        });
+    });
+
+    function getPlaceholderForType(type) {
+        if (type === 'date') return t('ph_date');
+        if (type === 'latlong') return t('ph_latlong');
+        if (type === 'youtube') return t('ph_youtube');
+        if (type === 'link') return "https://...";
+        if (type && type.startsWith('ref')) return t('ph_ref');
+        return type;
+    }
+
+    // --- 2. CSV SMART IMPORT LOGIC ---
+    function importCSVs(event) {
+        if (typeof Papa === 'undefined') { alert("PapaParse library missing."); return; }
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+        document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+
+        let parsedCount = 0;
+        files.forEach(file => {
+            Papa.parse(file, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    processParsedCSV(results, file.name);
+                    parsedCount++;
+                    if (parsedCount === files.length) { render(); document.getElementById('csv-upload').value = ''; }
+                }
+            });
+        });
+    }
+
+    function processParsedCSV(results, filename) {
+        const fields = results.meta.fields || [];
+        const data = results.data;
+        const activeData = state.data[state.activeTab];
+
+        const isProtocol = fields.includes('Attribute') && fields.includes('Type');
+
+        if (isProtocol) {
+            let newProtocol = [
+                { id: generateId('p'), name: 'pid', type: 'pid', desc: t('uid'), fixed: true },
+                { id: generateId('p'), name: 'label', type: 'label', desc: t('disp_name'), fixed: true }
+            ];
+
+            data.forEach(row => {
+                const attr = row['Attribute'] ? String(row['Attribute']).trim().replace(/\s+/g, '_') : '';
+                const typeRaw = row['Type'] ? String(row['Type']).trim() : 'text';
+                const type = baseDataTypes.includes(typeRaw) || typeRaw.startsWith('ref:') ? typeRaw : 'text';
+                
+                if (attr && attr !== 'pid' && attr !== 'label') {
+                    if (!newProtocol.some(p => p.name === attr)) {
+                        newProtocol.push({ id: generateId('p'), name: attr, type: type, desc: row['Description'] || '', fixed: false });
+                    }
+                }
+            });
+            activeData.protocol = newProtocol;
+
+            activeData.metadata.forEach(row => {
+                newProtocol.forEach(p => { if (row[p.name] === undefined) row[p.name] = ''; });
+                Object.keys(row).forEach(k => {
+                    if (k !== 'id' && k !== '__main_images' && !newProtocol.some(p => p.name === k)) delete row[k];
+                });
+            });
+            alert(t('csv_imported').replace('{name}', filename) + " (Protocol)");
+        } else {
+            fields.forEach(f => {
+                const cleanF = f.trim();
+                if (cleanF && !activeData.protocol.some(p => p.name === cleanF)) {
+                    activeData.protocol.push({ id: generateId('p'), name: cleanF, type: 'text', desc: 'Imported', fixed: false });
+                }
+            });
+
+            let newMetadata = [];
+            let missingPidCount = 0;
+            data.forEach(row => {
+                let newRow = { id: generateId('m'), __main_images: [] };
+                activeData.protocol.forEach(p => { newRow[p.name] = row[p.name] !== undefined ? String(row[p.name]).trim() : ''; });
+                if (!newRow.pid) missingPidCount++;
+                newMetadata.push(newRow);
+            });
+
+            if (missingPidCount > 0) {
+                const prefix = document.getElementById('pid-prefix').value.trim() || 'OBJ-';
+                newMetadata.forEach(row => { if (!row.pid) row.pid = generateNextPidForArray(newMetadata, prefix); });
+            }
+            activeData.metadata = newMetadata;
+            alert(t('csv_imported').replace('{name}', filename) + " (Metadata)");
+        }
+    }
+
+    function generateNextPidForArray(metadataArray, prefix) {
+        let maxNum = 0;
+        metadataArray.forEach(row => {
+            if (row.pid && typeof row.pid === 'string' && row.pid.startsWith(prefix)) {
+                const num = parseInt(row.pid.slice(prefix.length), 10);
+                if (!isNaN(num) && num > maxNum) maxNum = num;
+            }
+        });
+        return prefix + String(maxNum + 1).padStart(3, '0');
+    }
+
+    // --- 3. IMAGE HANDLING LOGIC ---
+    function setupDropzone() {
+        const dz = document.getElementById('dropzone');
+        dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', (e) => { e.preventDefault(); dz.classList.remove('dragover'); });
+        dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('dragover'); processFiles(e.dataTransfer.files); });
+    }
+
+    function handleImageInput(e) { processFiles(e.target.files); }
+
+    function processFiles(files) {
+        let addedCount = 0;
+        for (const file of files) {
+            if (file.type.startsWith('image/')) {
+                const fileId = file.webkitRelativePath || file.name;
+                imageFiles.set(fileId, file);
+                if (!imagePreviews.has(fileId)) imagePreviews.set(fileId, URL.createObjectURL(file));
+                addedCount++;
+            }
+        }
+        if (addedCount > 0) { autoMatchImages(); renderGallery(); render(); }
+    }
+
+    function autoMatchImages() {
+        state.tabs.forEach(tab => {
+            const data = state.data[tab];
+            data.metadata.forEach(row => {
+                if (!row.pid) return;
+                for (let fileId of imageFiles.keys()) {
+                    const parts = fileId.split('/');
+                    const filename = parts[parts.length - 1];
+                    const folderName = parts.length > 1 ? parts[parts.length - 2] : null;
+                    const baseName = filename.substring(0, filename.lastIndexOf('.')) || filename;
+                    
+                    if (folderName === row.pid || baseName === row.pid) {
+                        if (!row.__main_images.includes(fileId)) row.__main_images.push(fileId);
+                    }
+                }
+            });
+        });
+    }
+
+    function renderGallery() {
+        document.getElementById('img-count-badge').innerText = imageFiles.size;
+        const grid = document.getElementById('main-gallery-grid');
+        grid.innerHTML = '';
+        for (let [fileId, url] of imagePreviews.entries()) {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `<img src="${url}"><span>${fileId.split('/').pop()}</span>`;
+            grid.appendChild(div);
+        }
+    }
+
+    function openImageModal(rowId, fieldName) {
+        modalTargetRow = rowId; modalTargetField = fieldName;
+        const row = state.data[state.activeTab].metadata.find(r => r.id === rowId);
+        currentSelection = fieldName === '__main_images' ? [...(row.__main_images || [])] : (row[fieldName] ? [row[fieldName]] : []);
+        renderModalGallery();
+        document.getElementById('image-modal').showModal();
+    }
+
+    function renderModalGallery() {
+        const modalGrid = document.getElementById('modal-gallery-grid');
+        modalGrid.innerHTML = '';
+        if (imageFiles.size === 0) { modalGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--pico-muted-color);">No hay imágenes.</p>`; return; }
+        const isMulti = modalTargetField === '__main_images';
+
+        for (let [fileId, url] of imagePreviews.entries()) {
+            const isSelected = currentSelection.includes(fileId);
+            const div = document.createElement('div');
+            div.className = `gallery-item ${isSelected ? 'selected' : ''}`;
+            div.onclick = () => {
+                if (isMulti) {
+                    if (isSelected) currentSelection = currentSelection.filter(id => id !== fileId);
+                    else currentSelection.push(fileId);
+                } else currentSelection = isSelected ? [] : [fileId];
+                renderModalGallery(); 
+            };
+            div.innerHTML = `<img src="${url}"><span title="${fileId}">${fileId.split('/').pop()}</span>`;
+            modalGrid.appendChild(div);
+        }
+    }
+
+    function clearSelectedImage() {
+        const row = state.data[state.activeTab].metadata.find(r => r.id === modalTargetRow);
+        if (modalTargetField === '__main_images') row.__main_images = [];
+        else row[modalTargetField] = '';
+        closeImageModal(); render();
+    }
+
+    function saveModalSelection() {
+        const row = state.data[state.activeTab].metadata.find(r => r.id === modalTargetRow);
+        if (modalTargetField === '__main_images') row.__main_images = [...currentSelection];
+        else row[modalTargetField] = currentSelection.length > 0 ? currentSelection[0] : '';
+        closeImageModal(); render();
+    }
+
+    function closeImageModal() { document.getElementById('image-modal').close(); modalTargetRow = null; modalTargetField = null; currentSelection = []; }
+
+    // --- 4. CORE DATA LOGIC ---
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      if (tabName === '_gallery') {
+          document.getElementById('content-tables').classList.add('hidden');
+          document.getElementById('content-gallery').classList.remove('hidden');
+      } else {
+          document.getElementById('content-tables').classList.remove('hidden');
+          document.getElementById('content-gallery').classList.add('hidden');
+          protocolPage = 1; metadataPage = 1; 
+      }
+      renderTabs();
+      if (tabName !== '_gallery') { renderProtocol(); renderMetadata(); }
+    }
+
+    function addTab() {
+      const name = prompt(t('prompt_tab'));
+      if (!name) return;
+      const cleanName = name.trim().replace(/[^a-zA-Z0-9_]/g, ''); 
+      if (state.tabs.includes(cleanName)) return alert(t('err_tab_exists'));
+
+      state.tabs.push(cleanName);
+      state.data[cleanName] = {
+        protocol: [
+          { id: generateId('p'), name: 'pid', type: 'pid', desc: t('uid'), fixed: true },
+          { id: generateId('p'), name: 'label', type: 'label', desc: t('disp_name'), fixed: true }
+        ],
+        metadata: []
+      };
+      switchTab(cleanName);
+    }
+
+    function addProtocolField() {
+      const data = state.data[state.activeTab];
+      data.protocol.push({ id: generateId('p'), name: `attr_${data.protocol.length}`, type: 'text', desc: '', fixed: false });
+      render();
+    }
+
+    function updateProtocolField(id, key, newValue) {
+      const data = state.data[state.activeTab];
+      const field = data.protocol.find(f => f.id === id);
+      if (!field) return;
+
+      if (key === 'name') {
+        const oldName = field.name;
+        const cleanName = newValue.trim().replace(/\s+/g, '_');
+        if (data.protocol.some(f => f.id !== id && f.name === cleanName)) { alert(t('err_attr_exists')); render(); return; }
+        field.name = cleanName;
+        data.metadata.forEach(row => { if (row[oldName] !== undefined) { row[cleanName] = row[oldName]; delete row[oldName]; } });
+      } 
+      else if (key === 'type') {
+          // If changing to 'ref', default target is 'main'
+          field.type = newValue;
+      }
+      else if (key === 'refTarget') {
+          field.type = newValue === 'main' ? 'ref' : `ref:${newValue}`;
+      }
+      else {
+          field[key] = newValue;
+      }
+      render();
+    }
+
+    function deleteProtocolField(id) {
+      if (!confirm(t('confirm_del_attr'))) return;
+      const data = state.data[state.activeTab];
+      const idx = data.protocol.findIndex(f => f.id === id);
+      const fName = data.protocol[idx].name;
+      data.protocol.splice(idx, 1);
+      data.metadata.forEach(row => { delete row[fName]; });
+      render();
+    }
+
+    function generateNextPid(prefix) { return generateNextPidForArray(state.data[state.activeTab].metadata, prefix); }
+
+    function addMetadataRow() {
+      const data = state.data[state.activeTab];
+      const prefix = document.getElementById('pid-prefix').value.trim();
+      const newRow = { id: generateId('m'), __main_images: [] };
+      data.protocol.forEach(p => { newRow[p.name] = p.name === 'pid' ? generateNextPid(prefix) : ''; });
+      data.metadata.push(newRow);
+      render();
+    }
+
+    function updateMetadataCell(rowId, fieldName, value) {
+      const row = state.data[state.activeTab].metadata.find(r => r.id === rowId);
+      if (row) row[fieldName] = value;
+      render(); 
+    }
+
+    function deleteMetadataRow(rowId) {
+      state.data[state.activeTab].metadata = state.data[state.activeTab].metadata.filter(r => r.id !== rowId);
+      render();
+    }
+
+    function changeProtocolPage(delta) {
+        const maxPage = Math.ceil(state.data[state.activeTab].protocol.length / protocolPerPage);
+        protocolPage += delta;
+        if (protocolPage < 1) protocolPage = 1;
+        if (protocolPage > maxPage) protocolPage = maxPage;
+        render();
+    }
+
+    function changeProtocolPerPage(val) { protocolPerPage = val === 'all' ? 'all' : parseInt(val, 10); protocolPage = 1; render(); }
+
+    function changeMetadataPage(delta) {
+        const maxPage = Math.ceil(state.data[state.activeTab].metadata.length / metadataPerPage);
+        metadataPage += delta;
+        if (metadataPage < 1) metadataPage = 1;
+        if (metadataPage > maxPage) metadataPage = maxPage;
+        render();
+    }
+
+    function changeMetadataPerPage(val) { metadataPerPage = val === 'all' ? 'all' : parseInt(val, 10); metadataPage = 1; render(); }
+
+    // --- 5. RENDERING ENGINE ---
+    function render() {
+      if (state.activeTab === '_gallery') { renderTabs(); renderGallery(); return; }
+      renderTabs(); renderProtocol(); renderMetadata();
+    }
+
+    function renderTabs() {
+      const container = document.getElementById('tabs-container');
+      container.innerHTML = '';
+      state.tabs.forEach(tab => {
+        const div = document.createElement('div');
+        div.className = `tab ${state.activeTab === tab ? 'active' : ''}`;
+        div.innerText = tab === 'main' ? t('main_tab') : tab;
+        div.onclick = () => switchTab(tab);
+        container.appendChild(div);
+      });
+      const addBtn = document.createElement('div');
+      addBtn.className = 'tab tab-add';
+      addBtn.innerText = t('new_tab');
+      addBtn.onclick = addTab;
+      container.appendChild(addBtn);
+
+      const galBtn = document.createElement('div');
+      galBtn.className = `tab ${state.activeTab === '_gallery' ? 'active' : ''}`;
+      galBtn.style.marginLeft = 'auto';
+      galBtn.innerText = "🖼️ " + t('tab_gallery');
+      galBtn.onclick = () => switchTab('_gallery');
+      container.appendChild(galBtn);
+    }
+
+    function renderProtocol() {
+      const tbody = document.querySelector('#protocol-table tbody');
+      tbody.innerHTML = '';
+      const data = state.data[state.activeTab];
+      let rowsToRender = data.protocol;
+      let totalItems = rowsToRender.length;
+      let startIdx = 0, endIdx = totalItems;
+
+      if (protocolPerPage !== 'all') {
+          startIdx = (protocolPage - 1) * protocolPerPage;
+          endIdx = startIdx + protocolPerPage;
+          rowsToRender = rowsToRender.slice(startIdx, endIdx);
+      }
+
+      document.getElementById('protocol-page-info').innerText = totalItems === 0 ? '0' : t('showing_attr').replace('{start}', startIdx + 1).replace('{end}', Math.min(endIdx, totalItems)).replace('{total}', totalItems);
+      document.getElementById('protocol-page-current').innerText = protocolPerPage === 'all' ? t('all') : t('page').replace('{num}', protocolPage);
+      
+      const maxPage = protocolPerPage === 'all' ? 1 : Math.ceil(totalItems / protocolPerPage);
+      document.getElementById('protocol-btn-prev').disabled = protocolPage <= 1;
+      document.getElementById('protocol-btn-next').disabled = protocolPage >= maxPage || protocolPerPage === 'all';
+
+      rowsToRender.forEach(field => {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        if (field.fixed) tdName.innerHTML = `<span class="fixed-text">${field.name}</span>`;
+        else tdName.innerHTML = `<input type="text" value="${field.name}" onchange="updateProtocolField('${field.id}', 'name', this.value)">`;
+
+        const tdType = document.createElement('td');
+        if (field.fixed) {
+            tdType.innerHTML = `<span class="fixed-text">${field.type}</span>`;
+        } else {
+          const isRef = field.type.startsWith('ref');
+          const baseType = isRef ? 'ref' : field.type;
+          const refTarget = isRef ? (field.type.startsWith('ref:') ? field.type.substring(4) : 'main') : '';
+          
+          let selectHtml = `<div class="type-selector-group">`;
+          selectHtml += `<select onchange="updateProtocolField('${field.id}', 'type', this.value)">`;
+          baseDataTypes.forEach(tType => { selectHtml += `<option value="${tType}" ${baseType === tType ? 'selected' : ''}>${tType}</option>`; });
+          selectHtml += `</select>`;
+
+          // Secondary Dropdown specifically for 'ref' targets
+          if (isRef) {
+              selectHtml += `<select onchange="updateProtocolField('${field.id}', 'refTarget', this.value)">`;
+              selectHtml += `<option value="main" ${refTarget === 'main' ? 'selected' : ''}>${t('ref_target_main') || 'Main'}</option>`;
+              state.tabs.forEach(tName => {
+                  if (tName !== 'main') {
+                      selectHtml += `<option value="${tName}" ${refTarget === tName ? 'selected' : ''}>${tName}</option>`;
+                  }
+              });
+              // Ensure imported refs that don't match a tab yet still display correctly
+              if (refTarget !== 'main' && !state.tabs.includes(refTarget)) {
+                  selectHtml += `<option value="${refTarget}" selected>${refTarget}</option>`;
+              }
+              selectHtml += `</select>`;
+          }
+          selectHtml += `</div>`;
+          tdType.innerHTML = selectHtml;
+        }
+
+        const tdDesc = document.createElement('td');
+        tdDesc.innerHTML = `<input type="text" value="${field.desc}" placeholder="${t('desc_placeholder')}" onchange="updateProtocolField('${field.id}', 'desc', this.value)">`;
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'sticky-col';
+        if (!field.fixed) tdActions.innerHTML = `<button class="btn-delete" onclick="deleteProtocolField('${field.id}')">${t('delete')}</button>`;
+        else tdActions.innerHTML = `<span style="color: var(--pico-muted-color); font-size: 0.7rem;">${t('locked')}</span>`;
+
+        tr.append(tdName, tdType, tdDesc, tdActions);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderMetadata() {
+      const theadTr = document.querySelector('#metadata-table thead tr');
+      const tbody = document.querySelector('#metadata-table tbody');
+      theadTr.innerHTML = ''; tbody.innerHTML = '';
+      const data = state.data[state.activeTab];
+      
+      const allPids = data.metadata.map(r => r.pid).filter(p => p);
+      const duplicatePids = allPids.filter((item, index) => allPids.indexOf(item) !== index);
+
+      data.protocol.forEach(field => {
+        const th = document.createElement('th');
+        th.style.minWidth = (field.type === 'image' || field.name === 'pid') ? '200px' : '150px';
+        th.innerHTML = `${field.name}<br><span style="color:var(--pico-muted-color); font-weight:normal; font-size:0.65rem;">${field.type}</span>`;
+        theadTr.appendChild(th);
+      });
+      const thAction = document.createElement('th');
+      thAction.innerText = t('actions'); thAction.className = "sticky-col";
+      theadTr.appendChild(thAction);
+
+      let rowsToRender = data.metadata;
+      let totalItems = rowsToRender.length;
+      let startIdx = 0, endIdx = totalItems;
+
+      if (metadataPerPage !== 'all') {
+          startIdx = (metadataPage - 1) * metadataPerPage;
+          endIdx = startIdx + metadataPerPage;
+          rowsToRender = rowsToRender.slice(startIdx, endIdx);
+      }
+
+      document.getElementById('metadata-page-info').innerText = totalItems === 0 ? '0' : t('showing_items').replace('{start}', startIdx + 1).replace('{end}', Math.min(endIdx, totalItems)).replace('{total}', totalItems);
+      document.getElementById('metadata-page-current').innerText = metadataPerPage === 'all' ? t('all') : t('page').replace('{num}', metadataPage);
+      
+      const maxPage = metadataPerPage === 'all' ? 1 : Math.ceil(totalItems / metadataPerPage);
+      document.getElementById('metadata-btn-prev').disabled = metadataPage <= 1;
+      document.getElementById('metadata-btn-next').disabled = metadataPage >= maxPage || metadataPerPage === 'all';
+
+      rowsToRender.forEach(row => {
+        if (!row.__main_images) row.__main_images = [];
+
+        const tr = document.createElement('tr');
+        data.protocol.forEach(field => {
+          const td = document.createElement('td');
+          const val = row[field.name] || '';
+          
+          if (field.name === 'pid') {
+              let inputHtml = `<input type="text" value="${val}" onchange="updateMetadataCell('${row.id}', '${field.name}', this.value)">`;
+              if (val && duplicatePids.includes(val)) inputHtml += `<br><span class="duplicate-warning">${t('duplicate_pid')}</span>`;
+              
+              let imgUI = '';
+              if (row.__main_images.length > 0) {
+                  const firstImg = row.__main_images[0];
+                  const hasMore = row.__main_images.length > 1;
+                  imgUI = `
+                    <div class="multi-img-container" onclick="openImageModal('${row.id}', '__main_images')">
+                      <img src="${imagePreviews.get(firstImg) || ''}" class="mini-thumb">
+                      ${hasMore ? `<span class="multi-badge">+${row.__main_images.length - 1}</span>` : ''}
+                    </div>`;
+              } else {
+                  imgUI = `<button class="secondary outline btn-img-add" onclick="openImageModal('${row.id}', '__main_images')">${t('main_img')}</button>`;
+              }
+              td.innerHTML = `<div class="pid-cell-group">${inputHtml}${imgUI}</div>`;
+          }
+          else {
+              const p_holder = getPlaceholderForType(field.type);
+              td.innerHTML = `<input type="text" value="${val}" placeholder="${p_holder}" onchange="updateMetadataCell('${row.id}', '${field.name}', this.value)">`;
+          }
+          tr.appendChild(td);
+        });
+        
+        const tdAction = document.createElement('td');
+        tdAction.className = 'sticky-col';
+        tdAction.innerHTML = `<button class="btn-delete" onclick="deleteMetadataRow('${row.id}')">${t('delete')}</button>`;
+        tr.appendChild(tdAction);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 6. WEBP & EXPORT LOGIC ---
+    function escapeCSV(str) {
+      if (!str) return '';
+      const s = String(str);
+      return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+
+    function convertFileToWebP(file, maxDimension = 1920, quality = 0.8) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) { height = (height / width) * maxDimension; width = maxDimension; }
+                    else { width = (width / height) * maxDimension; height = maxDimension; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob); else reject(new Error("Canvas failed"));
+                }, 'image/webp', quality);
+            };
+            img.onerror = reject; img.src = url;
+        });
+    }
+
+    async function exportCSVs() {
+      document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+      if (typeof JSZip === 'undefined') { alert("JSZip missing."); return; }
+      
+      const isWebP = document.getElementById('export-mode').value === 'webp';
+      const modal = document.getElementById('progress-modal');
+      const progBar = document.getElementById('export-progress');
+      const progText = document.getElementById('progress-text');
+      
+      const zip = new JSZip();
+      const imgFolder = zip.folder("images");
+      const processedImages = new Set(); 
+      const exportQueue = []; 
+      
+      state.tabs.forEach(tab => {
+        const data = state.data[tab];
+        data.metadata.forEach(row => {
+          if (row.__main_images && row.__main_images.length > 0) {
+              if (row.__main_images.length === 1) {
+                  const fileId = row.__main_images[0];
+                  if (imageFiles.has(fileId)) {
+                      const file = imageFiles.get(fileId);
+                      const ext = isWebP ? 'webp' : file.name.split('.').pop();
+                      const newName = `${row.pid}.${ext}`;
+                      if (!processedImages.has(newName)) { exportQueue.push({ fileId, newName, file }); processedImages.add(newName); }
+                  }
+              } else {
+                  const itemFolder = imgFolder.folder(row.pid);
+                  row.__main_images.forEach(fileId => {
+                      if (imageFiles.has(fileId)) {
+                          const file = imageFiles.get(fileId);
+                          const ext = isWebP ? 'webp' : file.name.split('.').pop();
+                          const baseOrig = file.name.substring(0, file.name.lastIndexOf('.'));
+                          const newName = `${row.pid}/${baseOrig}.${ext}`;
+                          if (!processedImages.has(newName)) { exportQueue.push({ fileId, newName, file }); processedImages.add(newName); }
+                      }
+                  });
+              }
+          }
+        });
+      });
+
+      modal.showModal();
+      progBar.max = exportQueue.length;
+      progBar.value = 0;
+
+      for (let i = 0; i < exportQueue.length; i++) {
+          const item = exportQueue[i];
+          progText.innerText = t('prog_img').replace('{n}', i + 1).replace('{total}', exportQueue.length);
+          try {
+              if (isWebP) {
+                  const webpBlob = await convertFileToWebP(item.file);
+                  imgFolder.file(item.newName, webpBlob);
+              } else { imgFolder.file(item.newName, item.file); }
+          } catch (e) { console.error("Error", item.newName, e); }
+          progBar.value = i + 1;
+      }
+
+      state.tabs.forEach(tab => {
+        const data = state.data[tab];
+        const isMain = tab === 'main';
+        
+        let protocolCSV = "Attribute,Type,Description\n";
+        data.protocol.forEach(p => { protocolCSV += `${escapeCSV(p.name)},${escapeCSV(p.type)},${escapeCSV(p.desc)}\n`; });
+        zip.file(isMain ? 'Protocol.csv' : `Protocol_${tab}.csv`, "\uFEFF" + protocolCSV);
+
+        const headers = data.protocol.map(p => p.name);
+        let metadataCSV = headers.map(escapeCSV).join(',') + '\n';
+        
+        data.metadata.forEach(row => {
+          const rowValues = headers.map(h => {
+             let cellVal = row[h] || '';
+             return escapeCSV(cellVal);
+          });
+          metadataCSV += rowValues.join(',') + '\n';
+        });
+        zip.file(isMain ? 'Metadata.csv' : `Metadata_${tab}.csv`, "\uFEFF" + metadataCSV);
+      });
+
+      progText.innerText = "Finalizando... / Finishing...";
+      const content = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(content); link.download = t('file_name_zip');
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      modal.close();
+    }
+
+    function exportProject() {
+      document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+      const projectJSON = JSON.stringify(state, null, 2);
+      const blob = new Blob([projectJSON], { type: 'application/json' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob); link.download = 'mirla_project.json';
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function importProject(event) {
+      document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if (!importedState.tabs || !importedState.data) throw new Error();
+          importedState.tabs.forEach(tab => {
+              importedState.data[tab].metadata.forEach(row => {
+                  if (row.__main_image && !row.__main_images) { row.__main_images = [row.__main_image]; delete row.__main_image; }
+                  if (!row.__main_images) row.__main_images = [];
+              });
+          });
+          state = importedState;
+          if (!state.tabs.includes(state.activeTab)) state.activeTab = state.tabs[0];
+          protocolPage = 1; metadataPage = 1; render(); document.getElementById('file-upload').value = ''; 
+          alert(currentLang === 'es' ? "Proyecto cargado. Arrastra tu carpeta /images a la Galería para reconectar las fotos." : "Project loaded. Drop your /images folder in the Gallery to reconnect photos.");
+        } catch (err) { alert(t('err_invalid_file')); }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
