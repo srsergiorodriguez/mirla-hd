@@ -3,7 +3,7 @@
   "description": "Generates a static digital collection with Svelte.",
   "license": "MIT",
   "author": "Sergio Rodríguez Gómez",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "scope": "site",
   "minimumPubliiVersion": "0.40.0",
   "usePluginSettingsView": false,
