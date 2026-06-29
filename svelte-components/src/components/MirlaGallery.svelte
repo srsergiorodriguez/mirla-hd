@@ -48,7 +48,9 @@
       {#each filteredItems as item (item.pid)}
         <a href="{siteDomain}item/{item.pid}/index.html" class="gallery-item">
           <div class="image-wrapper">
-            {#if item.images && item.images.length > 0}
+            {#if item.thumb}
+              <img src={item.thumb} alt={item.label || item.pid} loading="lazy" />
+            {:else if item.images && item.images.length > 0}
               <img src={item.images[0]} alt={item.label || item.pid} loading="lazy" />
             {:else}
               <div class="no-img">No Image</div>

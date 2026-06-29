@@ -224,23 +224,51 @@ class MirlaCollectionGenerator {
       const resolveImagesForPid = (pid) => {
         const pidStr = pid.toString().trim();
         let images = [];
-        const singleImageJpg = path.join(imagesInputPath, `${pidStr}.jpg`);
-        const singleImagePng = path.join(imagesInputPath, `${pidStr}.png`);
         const folderPath = path.join(imagesInputPath, pidStr);
         
-        if (fs.existsSync(singleImageJpg)) {
-          images.push(`${publicMediaUrl}/${pidStr}.jpg`);
-        } else if (fs.existsSync(singleImagePng)) {
-          images.push(`${publicMediaUrl}/${pidStr}.png`);
-        } else if (fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
+        // Define our supported, web-safe extensions
+        const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
+        let foundSingleImage = false;
+
+        // 1. Check for a single image match (Case-Insensitive Safe)
+        for (const ext of validExtensions) {
+          const lowerPath = path.join(imagesInputPath, `${pidStr}.${ext}`);
+          const upperPath = path.join(imagesInputPath, `${pidStr}.${ext.toUpperCase()}`);
+          
+          if (fs.existsSync(lowerPath)) {
+            images.push(`${publicMediaUrl}/${pidStr}.${ext}`);
+            foundSingleImage = true;
+            break; 
+          } else if (fs.existsSync(upperPath)) {
+            images.push(`${publicMediaUrl}/${pidStr}.${ext.toUpperCase()}`);
+            foundSingleImage = true;
+            break;
+          }
+        }
+
+        // 2. If no single image, check for a multi-image folder
+        if (!foundSingleImage && fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
           const files = fs.readdirSync(folderPath);
           files.forEach(file => {
-            if (file.match(/\.(jpg|jpeg|png|webp)$/i)) {
+            // The 'i' flag here automatically handles .JPG, .png, .WeBp, etc.
+            if (file.match(new RegExp(`\\.(${validExtensions.join('|')})$`, 'i'))) {
               images.push(`${publicMediaUrl}/${pidStr}/${file}`);
             }
           });
         }
+        
         return images;
+      };
+
+      const resolveThumbForPid = (pid) => {
+        const pidStr = pid.toString().trim();
+        const thumbWebp = path.join(imagesInputPath, `${pidStr}_thumb.webp`);
+        const thumbJpg = path.join(imagesInputPath, `${pidStr}_thumb.jpg`);
+        
+        if (fs.existsSync(thumbWebp)) return `${publicMediaUrl}/${pidStr}_thumb.webp`;
+        if (fs.existsSync(thumbJpg)) return `${publicMediaUrl}/${pidStr}_thumb.jpg`;
+        
+        return null;
       };
 
       // ==========================================
@@ -250,6 +278,7 @@ class MirlaCollectionGenerator {
         const rowNumber = index + 2;
         const pid = item.pid.toString().trim();
         item.images = resolveImagesForPid(pid);
+        item.thumb = resolveThumbForPid(pid);
 
         if (item.images.length === 0) {
             logMsg(`[Mirla Plugin] NOTICE: No images found for pid: '${pid}'`);
@@ -327,6 +356,7 @@ class MirlaCollectionGenerator {
         Object.values(dictionary).forEach(item => {
           item._collection_type = suffix;
           item.images = resolveImagesForPid(item.pid);
+          item.thumb = resolveThumbForPid(item.pid);
           validCollectionData.push(item);
         });
       }

@@ -96,7 +96,18 @@
     .gallery-item.selected { border-color: var(--pico-primary); box-shadow: 0 0 0 2px var(--pico-primary); }
     .gallery-item.selected::after { content: "✓"; position: absolute; top: 4px; right: 4px; background: var(--pico-primary); color: var(--pico-primary-inverse); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; }
     .gallery-item img { width: 100%; height: 90px; object-fit: cover; display: block; }
-    .gallery-item span { font-size: 0.65rem; display: block; padding: 0.2rem; background: var(--pico-card-background-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; }
+    .gallery-item span { 
+        font-size: 0.65rem; 
+        display: block; 
+        padding: 0.2rem; 
+        background: var(--pico-card-background-color); 
+        word-break: break-word; 
+        display: -webkit-box; 
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; 
+        overflow: hidden; 
+        line-height: 1.2; 
+    }
     
     .hidden { display: none !important; }
     .duplicate-warning { color: #d81b60; font-size: 0.65rem; display: block; margin-top: 0.1rem; font-weight: bold; }
@@ -354,8 +365,12 @@
   <dialog id="image-modal">
     <article>
       <header><strong data-i18n="select_imgs">Asignar Imágenes</strong></header>
-      <div style="margin-bottom: 0.5rem;">
+      <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
         <button class="secondary outline btn-action" onclick="clearSelectedImage()" data-i18n="clear_img">Quitar Imagen(es)</button>
+        <label style="font-size: 0.8rem; margin: 0; color: var(--pico-muted-color);">
+          <input type="checkbox" id="unassigned-toggle" onchange="toggleUnassigned(this.checked)">
+          <span data-i18n="show_unassigned">Mostrar solo sin asignar</span>
+        </label>
       </div>
       <div class="gallery-grid" id="modal-gallery-grid"></div>
       <footer>
@@ -414,7 +429,8 @@
         help_io_csv: "Importar tabla (CSV): Carga datos existentes. El sistema detecta automáticamente si el CSV es un Protocolo o son Metadatos.",
         help_s6_t: "6. Exportación final para Publii",
         help_s6_d: "Selecciona la compresión WebP en el menú 'Exportación' y haz clic en 'Descargar Colección (ZIP)'.",
-        help_s6_d2: "Extrae el contenido del ZIP y colócalo sin comprimir exactamente en la siguiente ruta de tu sitio en Publii:"
+        help_s6_d2: "Extrae el contenido del ZIP y colócalo sin comprimir exactamente en la siguiente ruta de tu sitio en Publii:",
+        show_unassigned: "Mostrar solo sin asignar"
       },
       en: {
         title: "Mirla Data Editor", 
@@ -454,7 +470,8 @@
         help_io_csv: "Import table (CSV): Loads existing data. The system automatically detects if the CSV is a Protocol or Metadata.",
         help_s6_t: "6. Final Export for Publii",
         help_s6_d: "Select WebP compression in the Export menu and click 'Download Collection (ZIP)'.",
-        help_s6_d2: "Extract the ZIP and place the uncompressed content exactly in this path inside your Publii site:"
+        help_s6_d2: "Extract the ZIP and place the uncompressed content exactly in this path inside your Publii site:",
+        show_unassigned: "Show unassigned only"
       }
     };
 
@@ -641,15 +658,42 @@
 
     function processFiles(files) {
         let addedCount = 0;
+        let thumbnailPromises = []; // We will collect all background tasks here
+
         for (const file of files) {
             if (file.type.startsWith('image/')) {
                 const fileId = file.webkitRelativePath || file.name;
                 imageFiles.set(fileId, file);
-                if (!imagePreviews.has(fileId)) imagePreviews.set(fileId, URL.createObjectURL(file));
+                
+                // Start the thumbnail generation and add it to our array
+                const task = generateUIThumbnail(file).then(tinyUrl => {
+                    imagePreviews.set(fileId, tinyUrl);
+                    
+                    // Update the modal if it's currently open
+                    const modal = document.getElementById('image-modal');
+                    if (modal && modal.open) {
+                        renderModalGallery();
+                    }
+                });
+
+                thumbnailPromises.push(task);
                 addedCount++;
             }
         }
-        if (addedCount > 0) { autoMatchImages(); renderGallery(); render(); }
+
+        if (addedCount > 0) {
+            // Wait for ALL thumbnails to finish generating...
+            Promise.all(thumbnailPromises).then(() => {
+                // ... THEN safely redraw the table and the bottom gallery!
+                try {
+                    if (typeof renderMetadata === 'function') renderMetadata(); 
+                } catch (e) {}
+                
+                autoMatchImages(); 
+                renderGallery(); 
+                render(); 
+            });
+        }
     }
 
     function autoMatchImages() {
@@ -683,6 +727,27 @@
         }
     }
 
+    // Generates a tiny, lightweight DataURL for the UI to prevent RAM overload
+    function generateUIThumbnail(file) {
+        return new Promise(resolve => {
+            const img = new Image();
+            const objUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(objUrl);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const MAX = 120; // Tiny size for the UI
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                else       { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                canvas.width = w; canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.5)); // High compression just for preview
+            };
+            img.src = objUrl;
+        });
+    }
+
     function openImageModal(rowId, fieldName) {
         modalTargetRow = rowId; modalTargetField = fieldName;
         const row = state.data[state.activeTab].metadata.find(r => r.id === rowId);
@@ -694,10 +759,23 @@
     function renderModalGallery() {
         const modalGrid = document.getElementById('modal-gallery-grid');
         modalGrid.innerHTML = '';
-        if (imageFiles.size === 0) { modalGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--pico-muted-color);">No hay imágenes.</p>`; return; }
+        if (imageFiles.size === 0) { 
+            modalGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--pico-muted-color);">No hay imágenes.</p>`; 
+            return; 
+        }
+        
         const isMulti = modalTargetField === '__main_images';
+        const assignedSet = showUnassignedOnly ? getAssignedImages() : new Set();
+        let renderedCount = 0;
 
         for (let [fileId, url] of imagePreviews.entries()) {
+            // Filter logic: If we only want unassigned, and this image IS assigned, 
+            // AND it's not currently selected by the item we are editing, skip it.
+            if (showUnassignedOnly && assignedSet.has(fileId) && !currentSelection.includes(fileId)) {
+                continue;
+            }
+
+            renderedCount++;
             const isSelected = currentSelection.includes(fileId);
             const div = document.createElement('div');
             div.className = `gallery-item ${isSelected ? 'selected' : ''}`;
@@ -710,6 +788,10 @@
             };
             div.innerHTML = `<img src="${url}"><span title="${fileId}">${fileId.split('/').pop()}</span>`;
             modalGrid.appendChild(div);
+        }
+
+        if (renderedCount === 0) {
+            modalGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--pico-muted-color);">No hay imágenes sin asignar.</p>`;
         }
     }
 
@@ -728,6 +810,31 @@
     }
 
     function closeImageModal() { document.getElementById('image-modal').close(); modalTargetRow = null; modalTargetField = null; currentSelection = []; }
+
+    let showUnassignedOnly = false;
+
+    function toggleUnassigned(isChecked) {
+        showUnassignedOnly = isChecked;
+        renderModalGallery();
+    }
+
+    // Helper to find all images currently assigned to any item across all tabs
+    function getAssignedImages() {
+        const assigned = new Set();
+        state.tabs.forEach(tab => {
+            const data = state.data[tab];
+            const imgFields = data.protocol.filter(p => p.type === 'image').map(p => p.name);
+            data.metadata.forEach(row => {
+                // Add main images
+                if (row.__main_images) row.__main_images.forEach(img => assigned.add(img));
+                // Add supplementary images
+                imgFields.forEach(f => {
+                    if (row[f]) assigned.add(row[f]);
+                });
+            });
+        });
+        return assigned;
+    }
 
     // --- 4. CORE DATA LOGIC ---
     function switchTab(tabName) {
@@ -1053,6 +1160,27 @@
         });
     }
 
+    function generateWebPThumbnail(file) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const objUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(objUrl);
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const MAX = 400; // Tamaño ideal para el grid de la galería
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+          else       { if (h > MAX) { w *= MAX / h; h = MAX; } }
+          canvas.width = w; canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          // Exporta a WebP con calidad del 60% para que sea ultra ligera
+          canvas.toBlob(resolve, 'image/webp', 0.8); 
+        };
+        img.src = objUrl;
+      });
+    }
+
     async function exportCSVs() {
       document.querySelectorAll('details.dropdown').forEach(d => d.removeAttribute('open'));
       if (typeof JSZip === 'undefined') { alert("JSZip missing."); return; }
@@ -1104,9 +1232,18 @@
           progText.innerText = t('prog_img').replace('{n}', i + 1).replace('{total}', exportQueue.length);
           try {
               if (isWebP) {
+                  // 1. Genera y guarda la imagen HD principal
                   const webpBlob = await convertFileToWebP(item.file);
                   imgFolder.file(item.newName, webpBlob);
-              } else { imgFolder.file(item.newName, item.file); }
+                  
+                  // 2. NUEVO: Genera y guarda la miniatura
+                  const thumbBlob = await generateWebPThumbnail(item.file);
+                  const thumbName = item.newName.replace('.webp', '_thumb.webp');
+                  imgFolder.file(thumbName, thumbBlob);
+                  
+              } else { 
+                  imgFolder.file(item.newName, item.file); 
+              }
           } catch (e) { console.error("Error", item.newName, e); }
           progBar.value = i + 1;
       }

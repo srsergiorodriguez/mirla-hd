@@ -1,11 +1,11 @@
 ==========================================
 MIRLA COLLECTION GENERATOR - HEALTH REPORT
-Date: 5/20/2026, 5:07:18 PM
+Date: 6/9/2026, 9:21:28 AM
 ==========================================
 
 ==========================================
 [Mirla Plugin] Starting Generation & Validation...
-[Mirla Plugin] Copied OpenSeadragon icons to /Users/sergiorodriguez/Documents/Publii/sites/mirla-hd/output/media/plugins/mirla/osd_icons
+[Mirla Plugin] Copied OpenSeadragon icons to /Users/sergiorodriguez/Documents/Publii/sites/mirla-hd/preview/media/plugins/mirla/osd_icons
 [Mirla Plugin] WARNING parsing Protocol Protocol.csv: Some rows may be missing trailing commas.
 [Mirla Plugin] Loaded Main Protocol Schema.
 [Mirla Plugin] Loaded Secondary Table: Tecnica (5 items)
