@@ -250,8 +250,11 @@ class MirlaCollectionGenerator {
         if (!foundSingleImage && fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
           const files = fs.readdirSync(folderPath);
           files.forEach(file => {
-            // The 'i' flag here automatically handles .JPG, .png, .WeBp, etc.
-            if (file.match(new RegExp(`\\.(${validExtensions.join('|')})$`, 'i'))) {
+            // Check for valid extensions AND ensure the filename does not end with '_thumb'
+            const isMatch = file.match(new RegExp(`\\.(${validExtensions.join('|')})$`, 'i'));
+            const isNotThumb = !file.toLowerCase().includes('_thumb.');
+            
+            if (isMatch && isNotThumb) {
               images.push(`${publicMediaUrl}/${pidStr}/${file}`);
             }
           });
@@ -309,7 +312,7 @@ class MirlaCollectionGenerator {
               }
             }
             else if (expectedType.startsWith('ref')) {
-               const refs = valStr.split('/');
+               const refs = valStr.split(/[/,;]+/);
                const parsedRefs = [];
 
                refs.forEach(refPid => {
