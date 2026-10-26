@@ -1,6 +1,6 @@
 # Mirla Plan — Active Sprint
 
-> Branch: `agent-dev`. Status: **planning complete, implementation not started**.
+> Branch: `agent-dev`. Status: **Sprint 0 complete; Sprint 1 next**.
 > Last updated: 2026-10-26.
 
 The work is split into sequential sprints. Only the sprint marked **ACTIVE** is implemented at a time. Do not start the next sprint until the current acceptance criteria are met and `diary.md` is updated.
@@ -11,7 +11,7 @@ The work is split into sequential sprints. Only the sprint marked **ACTIVE** is 
 
 ### Sprint 0 — Foundations, docs, and the plugin dev loop
 
-**Status:** implementation complete; one manual Publii GUI preview check pending.
+**Status:** complete and verified.
 
 **Goal:** one codebase, one branch, and a documented contract before touching UI code.
 
@@ -29,13 +29,13 @@ The work is split into sequential sprints. Only the sprint marked **ACTIVE** is 
 - [x] Verify the symlink at the loader level (`is symlink: true`, `main.js` resolved from the repo).
 - [x] Verify the plugin's full `processDataset` path against a temporary collection (56 items, 56 item pages, JSON + report).
 - [x] Verify link/unlink/rollback in an isolated temporary Publii home.
-- [ ] Restart Publii and run a real preview/publish (GUI check; user confirmation pending).
+- [x] Restart Publii and run a real preview/publish (confirmed working by the user).
 - [x] Record the verification in `diary.md`.
 
 **Acceptance:**
 
 - `~/Documents/Publii/plugins/mirlaPlugin` resolves to `mirla-hd/mirlaPlugin`.
-- A Publii preview uses the repo source; no copy step is needed. *(Loader and full plugin smoke verified; GUI preview pending.)*
+- A Publii preview uses the repo source; no copy step is needed. *(Loader, full plugin smoke, and real Publii preview/publish verified.)*
 - The release workflow zips the same repo folder.
 - Rolling back restores the pre-existing installed plugin.
 - No application code has changed yet.
