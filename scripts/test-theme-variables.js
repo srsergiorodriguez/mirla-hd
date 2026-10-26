@@ -96,6 +96,10 @@ const printTemplate = fs.readFileSync(path.join(themeDir, 'page-print.hbs'), 'ut
 for (const token of ['fonts.css', 'printPageWidth', 'printFontBody', 'printImageTreatment']) {
     assert(printTemplate.includes(token), `Print template does not use ${token}`);
 }
+assert(
+    /fonts\.css[^>]*data-pagedjs-ignore/.test(printTemplate),
+    'The print fonts.css link must be ignored by Paged.js (file:// fetch would abort pagination)'
+);
 
 const headTemplate = fs.readFileSync(path.join(themeDir, 'partials', 'head.hbs'), 'utf8');
 assert(headTemplate.includes('fonts.css'), 'Head does not load fonts.css');

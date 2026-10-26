@@ -144,7 +144,7 @@ Print settings (Theme → Print):
 - `printFontBody` / `printFontHeading` / `printFontCode` (bundled fonts).
 - `printImageTreatment`: `grayscale` (default) or `color`.
 
-The print template links `assets/css/fonts.css` directly, so it does not load the web `style.css`.
+The print template links `assets/css/fonts.css` directly. That link **must** carry `data-pagedjs-ignore`: Paged.js collects external stylesheets and fetches them, and a `file://` fetch rejects in Publii previews, aborting pagination and leaving a white page. The attribute keeps the browser loading the fonts while Paged.js only processes the inline print CSS.
 
 ### 3.3 Font sources and presets (implemented)
 

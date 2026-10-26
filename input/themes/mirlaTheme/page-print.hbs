@@ -5,8 +5,10 @@
   <meta charset="utf-8">
   <title>{{title}} - {{@website.name}}</title>
 
-  {{!-- Self-hosted fonts; no Google Fonts request --}}
-  <link rel="stylesheet" href="{{css "fonts.css"}}">
+  {{!-- Self-hosted fonts; no Google Fonts request.
+       Paged.js fetches external stylesheets and rejects on file:// previews;
+       keep this link outside the Paged.js pipeline. --}}
+  <link rel="stylesheet" href="{{css "fonts.css"}}" data-pagedjs-ignore>
 
   <style>
     :root {

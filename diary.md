@@ -275,3 +275,32 @@
 **Next**
 - Publii preview/restart to confirm the new Fonts/Color/Print settings and default look.
 - Then Sprint 3: print catalog.
+
+---
+
+## 2026-10-26 — Sprint 2 fix: white print preview
+
+**Symptom:** the Printable Page Template rendered a white screen in Publii after the Sprint 2 theme changes.
+
+**Cause:** `page-print.hbs` linked the new external `assets/css/fonts.css`. Paged.js collects external stylesheets and fetches them before pagination; in the Publii preview the `file://` fetch rejects with a `ProgressEvent`, so `PagedPolyfill.preview()` aborts and the page is removed/left blank. The exact console error was:
+
+```
+paged.polyfill.js Uncaught (in promise) #<ProgressEvent>
+```
+
+**Fix:** mark the print font stylesheet with `data-pagedjs-ignore`:
+
+```html
+<link rel="stylesheet" href="{{css "fonts.css"}}" data-pagedjs-ignore>
+```
+
+Paged.js leaves the link alone, the browser still loads the fonts, and the inline print CSS is paginated normally. Added a comment in `page-print.hbs`, a regression check in `scripts/test-theme-variables.js`, and a note in `design-system.md`.
+
+**Verification**
+- The generated preview page was patched with the attribute for an immediate reload test.
+- The source template now has the attribute; Publii will emit it on the next preview.
+- `scripts/test-theme-variables.js` rejects a print template where the fonts.css link is not ignored.
+
+**Still pending**
+- User confirmation that the real Publii preview renders again.
+- Sprint 2 push remains paused.
