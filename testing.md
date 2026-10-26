@@ -46,13 +46,13 @@ These are brittle, slow, and do not protect the contract that matters. Visual pa
 
 Do not add Playwright/Cypress/JSDOM for visual or layout testing. If a future feature genuinely requires a browser API, isolate it behind an adapter and test the pure part.
 
-Suggested commands (to be added in the relevant phase):
+Commands (component tests exist as of Sprint 1):
 
 ```bash
 # Plugin
 cd mirlaPlugin && npm test
 
-# Components
+# Components (Vitest, 30 tests)
 cd svelte-components && npm test
 
 # Editor

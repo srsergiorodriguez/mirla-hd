@@ -29,7 +29,7 @@ The theme does not hardcode a brand palette. It uses Pico's color system:
 - `themeColorVersion`: Pico color version (red, pink, fuchsia, purple, violet, indigo, blue, azure, cyan, jade, green, lime, yellow, amber, pumpkin, orange, sand, grey, zinc, slate; default: `.blue.` in `config.json`, current site uses `.` = azure).
 - Shoelace is synchronized to Pico through `assets/css/main.css`.
 
-Semantic tokens (planned, with current fallbacks):
+Semantic tokens (implemented; values preserve the previous look):
 
 | Token | Default expression | Used for |
 |---|---|---|
@@ -45,7 +45,9 @@ Semantic tokens (planned, with current fallbacks):
 | `--mirla-border-subtle` | `color-mix(in srgb, var(--pico-color, currentColor) 12%, transparent)` | Internal dividers (where a lighter line is already used) |
 | `--mirla-focus-ring` | `var(--sl-focus-ring-color, rgba(52,152,219,.2))` | Focus shadow |
 | `--mirla-danger` | `var(--pico-del-color, #d81b60)` | Errors, destructive actions |
-| `--mirla-shadow` | `var(--pico-box-shadow, 0 2px 4px rgba(0,0,0,.1))` | Panels and cards |
+| `--mirla-shadow` | `var(--pico-box-shadow, 0 2px 4px rgba(0,0,0,.1))` | Panels |
+| `--mirla-shadow-card` | `var(--pico-card-box-shadow, 0 2px 4px rgba(0,0,0,.05))` | Compact cards (ItemsBar) |
+| `--mirla-border-form` | `var(--pico-form-element-border-color, rgba(0,0,0,.1))` | Media frames and card borders |
 
 Rules:
 
@@ -280,7 +282,7 @@ New components must use these breakpoints rather than inventing arbitrary ones. 
 
 See `architecture.md` §6 for the prop table. The public tags, attribute names, and default behavior are frozen during the refactor.
 
-### 6.2 Shared Svelte primitives (planned)
+### 6.2 Shared Svelte primitives (implemented)
 
 These are **internal Svelte components**, not custom elements. They are imported by the public components and compiled into the same bundle.
 
@@ -290,7 +292,7 @@ These are **internal Svelte components**, not custom elements. They are imported
 | `SearchField` | Label-less search input with consistent height/radius/focus | Four duplicated `.search-bar` blocks |
 | `FilterSelect` | Label + select pair for filter grids | `.filter-group` copies |
 | `StatusBar` | Count + actions row with top divider | `.status-bar` copies |
-| `Button` | Variants: `ghost`, `primary`, `icon`, `pill`; sizes; focus ring | `.reset-btn`, `.csv-btn`, `.pager-btn`, `.btn` variants |
+| `Button` | Variants: `ghost`, `primary`, `icon`, `plain`, `pager`; sizes; focus ring | `.reset-btn`, `.csv-btn`, `.pager-btn`, `.btn` variants |
 | `Pager` | Prev/next + "current / total" with disabled states | Index pager (appears twice), future table pager |
 | `EmptyState` | Dashed/bordered empty message | `.mirla-empty`, `.error`, `.no-data` variants |
 | `ErrorState` | Monospace red dashed error box | `.mirla-error` copies |
@@ -298,9 +300,9 @@ These are **internal Svelte components**, not custom elements. They are imported
 | `ItemCard` | Image + label + link, with thumb fallback | Index cards, gallery cards, preview image area |
 | `ItemGrid` | Responsive grid of `ItemCard` | Index gallery grid, gallery grid, ItemsBar grid |
 | `Legend` | Color swatch + label + count, keyboard-selectable | Waffle legend |
-| `VizFrame` | Wrapper + reset button + `ItemsBar` slot | Visualization outer containers |
-| `TableShell` | Scroll container, sticky header, table tokens | Table/protocol table wrappers |
-| `Icon` | Small inline SVG set (download, reset, close, chevrons) | Repeated inline SVG markup |
+| `TableShell` | Scroll container and border/radius tokens | Table/protocol table wrappers |
+
+Not implemented in Sprint 1: `VizFrame` (each visualization keeps its outer wrapper and composes `ResetButton` + `ItemsBar`) and `Icon` (only one inline SVG remains). Add them only if a second use appears.
 
 Primitive rules:
 
@@ -310,7 +312,7 @@ Primitive rules:
 - Primitives accept `children`/snippets for actions and labels where flexibility is needed.
 - Primitives must render correctly in light and dark mode and at 320px width.
 
-### 6.3 Shared data helpers (planned)
+### 6.3 Shared data helpers (implemented)
 
 `src/lib/data.js`:
 
@@ -345,15 +347,12 @@ These functions are pure and are the main target of `testing.md`.
 - **Theme tokens** live in `input/themes/mirlaTheme/assets/css/main.css` (`:root`). They are the runtime source of truth for the site.
 - **Dynamic theme tokens** (font families, widths, print sizes) are emitted by `theme-variables.js` into the generated `style.css`.
 - **Component CSS** uses `var(--mirla-*, <fallback>)` so it remains usable in the dev harness without the theme.
-- The dev harness may import a small `src/styles/dev-tokens.css` that mirrors the defaults. It is not shipped and not the source of truth.
+- The dev harness relies on the component fallbacks and Pico; it does not ship a separate token file. The theme remains the runtime source of truth.
 
 ### 7.2 Scoping
 
-- Svelte custom elements are compiled without Shadow DOM (`customElement` option only). Component styles are injected globally with Svelte's scoping hash.
-- Use `:global()` only for:
-  - SVG elements created by D3;
-  - the custom element host itself;
-  - documented third-party overrides.
+- Svelte custom elements are compiled with **Shadow DOM**. Component styles are injected into the shadow root. CSS custom properties (`--pico-*`, `--mirla-*`) inherit through the shadow boundary, so theme tokens and light/dark colors still work. Document-level selectors and the theme's `[data-theme]` rules do **not** cross the boundary; use `:host`, `:host-context`, a scoped selector, or a data-driven SVG/canvas attribute instead.
+- Use `:global()` only for document-level overrides. Inside a shadow root, `:global(mirla-barchart svg text)` cannot match the host; prefer a scoped `svg text` rule or D3 attributes. Audit the existing `:global(mirla-*)` rules rather than copying them into new components.
 - Do not style generic tags (`table`, `input`, `button`) from a component; scope to a class to avoid leaking into page content.
 
 ### 7.3 Class naming

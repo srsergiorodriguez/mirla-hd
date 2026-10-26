@@ -108,9 +108,9 @@ A 10x10 grid that visualizes proportions beautifully, ideal for physical collect
 **3. Timeline**
 Plots items across a horizontal timeline.
 ```html
-<mirla-timeline date-key="Year"></mirla-timeline>
+<mirla-timeline datekey="Year"></mirla-timeline>
 ```
-* `date-key`: The column containing your chronological data (e.g., `1998` or `1998-05-12`).
+* `datekey`: The column containing your chronological data (e.g., `1998` or `1998-05-12`).
 
 **4. Tree / Dendrogram**
 A hierarchical tree showing how categories break down into subcategories.
@@ -122,16 +122,16 @@ A hierarchical tree showing how categories break down into subcategories.
 **5. Network Graph**
 A physics-based, interactive canvas showing connections between entities.
 ```html
-<mirla-network source-key="Author" target-key="Movement"></mirla-network>
+<mirla-network sourcekey="Author" targetkey="Movement"></mirla-network>
 ```
-* `source-key` & `target-key`: The two columns establishing the relationships (e.g., Authors and the Artistic Movements they belong to).
+* `sourcekey` & `targetkey`: The two columns establishing the relationships (e.g., Authors and the Artistic Movements they belong to).
 
 **6. Geographic Map**
 An interactive world map that plots your items by location.
 ```html
-<mirla-map coord-key="latlong"></mirla-map>
+<mirla-map coordkey="latlong"></mirla-map>
 ```
-* `coord-key`: The column containing your `"latitude, longitude"` strings.
+* `coordkey`: The column containing your `"latitude, longitude"` strings.
 
 ---
 

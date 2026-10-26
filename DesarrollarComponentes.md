@@ -10,101 +10,127 @@ Todos los componentes de Mirla se construyen utilizando **Svelte 5** compilado a
 
 El desarrollo de componentes ocurre en el directorio `svelte-components` de tu repositorio.
 
-* `src/components/`: Aquí es donde viven todos tus archivos `.svelte`.
-* `src/index.js`: El punto de entrada principal que registra los componentes.
-  
+* `src/components/`: Los custom elements públicos (`<mirla-*>`).
+* `src/components/index.js`: El punto de entrada que registra los componentes.
+* `src/lib/data.js`: Helpers puros para leer y normalizar la colección.
+* `src/lib/format.js`: Formateo de valores y textos.
+* `src/lib/palette.js`: Paleta categórica compartida.
+* `src/lib/ui/`: Primitivos internos (`Surface`, `SearchField`, `StatusBar`, `Button`, `Pager`, `EmptyState`, `ErrorState`, `ResetButton`, `ItemCard`, `ItemGrid`, `Legend`, `TableShell`).
+* `src/dev/`: Colección sintética y arranque del harness de desarrollo.
+* `index.html`: Harness visual (`npm run dev`). No se incluye en el bundle de producción.
 
-OJO: Vite compila el archivo final `mirla-components.js` directamente en el tema mirlaTheme de Publii  `input/themes/assets/js`
+OJO: Vite compila el archivo final `mirla-components.js` directamente en el tema de Publii: `input/themes/mirlaTheme/assets/js/`. No edites ese archivo a mano.
+
+Para ejecutar el harness:
+
+```bash
+npm run dev
+```
+
+Para compilar y probar:
+
+```bash
+npm run test
+npm run build
+```
 
 ---
 
 ## Paso 1: Crear el Archivo del Componente
 
-Crea un nuevo archivo en `src/components/` (por ejemplo, `MirlaNuevo.svelte`). 
+Crea un nuevo archivo en `src/components/` (por ejemplo, `MirlaNuevo.svelte`).
 
 ### Arquitectura de un Componente Mirla
 
-Todos los componentes de Mirla deben adherirse a las siguientes convenciones para asegurar la compatibilidad con el sistema de datos generado por el plugin y el sistema de diseño (PicoCSS):
+Todos los componentes deben usar los helpers de datos y los primitivos del sistema de diseño. No leas `window.MIRLA_*` directamente ni dupliques controles.
 
-```html
+```svelte
 <svelte:options customElement="mirla-nuevo" />
 
 <script>
-  // 1. DEFINICIÓN DE PROPS
-  // Usa $props() de Svelte 5. Define valores por defecto para evitar errores.
-  let { 
-    titulo = "Título por Defecto",
-    clave = "" // Ejemplo de prop para filtrar datos
+  import { getCollection, getContext, getI18n, toLabels } from '$lib/data.js';
+  import EmptyState from '$lib/ui/EmptyState.svelte';
+  import SearchField from '$lib/ui/SearchField.svelte';
+  import StatusBar from '$lib/ui/StatusBar.svelte';
+  import Surface from '$lib/ui/Surface.svelte';
+
+  let {
+    titulo = 'Título por defecto',
+    clave = ''
   } = $props();
 
-  // 2. CONSUMO DE DATOS
-  // Los datos siempre son inyectados globalmente por el plugin de Publii
-  const collectionData = window.MIRLA_COLLECTION_DATA || { items: [], filters: [], protocol: {} };
-  const allItems = collectionData.items || [];
-  
-  // Opcional: Contexto global para internacionalización o dominio base
-  const siteDomain = window.MIRLA_CONTEXT?.siteDomain || "";
-
-  // 3. LÓGICA REACTIVA
-  // Usa $derived para filtrar o procesar datos basados en los props
-  let datosFiltrados = $derived.by(() => {
-    if (!clave) return allItems;
-    return allItems.filter(item => item[clave] !== undefined);
+  // 1. Datos y contexto: siempre a través de los helpers.
+  const collectionData = getCollection();
+  const { siteDomain } = getContext();
+  const i18n = getI18n(globalThis, {
+    searchPlaceholder: 'Buscar...',
+    resultsFound: 'resultados'
   });
 
+  // 2. Estado local y lógica reactiva.
+  let searchQuery = $state('');
+  let datosFiltrados = $derived.by(() => {
+    if (!clave) return collectionData.items;
+    return collectionData.items.filter(
+      (item) => toLabels(item[clave]).length > 0 &&
+        JSON.stringify(item).toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 </script>
 
-<!-- 4. ESTRUCTURA HTML Y CLASES DEL SISTEMA DE DISEÑO -->
+<!-- 3. Estructura con primitivos y tokens. -->
 <div class="mirla-app-container">
-  <h3>{titulo}</h3>
-  
-  <div class="controls-container">
-    <p>Encontrados: {datosFiltrados.length} elementos.</p>
-  </div>
+  <Surface>
+    <h3>{titulo}</h3>
+    <SearchField
+      bind:value={searchQuery}
+      placeholder={i18n.searchPlaceholder}
+      label={i18n.searchPlaceholder}
+      spacing="none"
+    />
+    <StatusBar count={datosFiltrados.length} suffix={i18n.resultsFound} />
+  </Surface>
+
+  {#if datosFiltrados.length === 0}
+    <EmptyState variant="table">No hay resultados.</EmptyState>
+  {/if}
 </div>
 
-<!-- 5. ESTILOS ENCAPSULADOS -->
+<!-- 4. Estilos encapsulados. La mayoría de la UI ya vive en los primitivos. -->
 <style>
-  /* Contenedor principal: Hereda tipografía y colores del tema PicoCSS */
   .mirla-app-container {
-    margin: 2em 0;
-    font-family: var(--pico-font-family, inherit);
-    color: var(--pico-color, inherit);
-    
-    /* Variable de borde estandarizada de Mirla para consistencia */
-    --mirla-border: color-mix(in srgb, var(--pico-color, currentColor) 20%, transparent);
-  }
-
-  /* Tarjetas/Controles: Usa las variables de PicoCSS para soporte automático Claro/Oscuro */
-  .controls-container {
-    background: var(--pico-card-background-color, #f8f9fa);
-    padding: 1.5rem;
-    border-radius: var(--pico-border-radius, 8px);
-    margin-bottom: 2rem;
-    box-shadow: var(--pico-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
-    border: 1px solid var(--mirla-border);
+    margin: var(--mirla-space-5xl, 2em) 0;
+    font-family: var(--mirla-font-body, var(--pico-font-family, inherit));
+    color: var(--mirla-text, var(--pico-color, inherit));
   }
 </style>
 ```
 
 ### Reglas Clave de Desarrollo
-1. **Atributos siempre en minúsculas:** Las propiedades (props) de los custom elements deben ser pasadas sin guiones ni caracteres especiales (ej. usa `sourcekey`, no `source-key`).
-2. **Variables de PicoCSS:** Nunca hardcodees colores estáticos (como `#ffffff` o `#000000`). Siempre usa variables como `var(--pico-card-background-color)` para garantizar que el componente respete el cambio entre Modo Claro y Oscuro de Publii.
-3. **Manejo de Refs:** Recuerda que los atributos marcados como relacionales (`ref:Tabla`) en el `Protocol.csv` se pasan al componente como Arrays de Objetos (Stubs), no como simples Strings de texto. Escribe tu lógica de filtrado teniendo en cuenta la estructura `{ pid, label, images }`.
+
+1. **Atributos siempre en minúsculas:** usa `sourcekey`, no `source-key`. Los atributos HTML se normalizan a minúsculas.
+2. **Datos a través de helpers:** `getCollection`, `getContext`, `getI18n`, `toLabels`, `splitValues`, `getItemImage`, `groupCounts`, etc. No reimplementes la normalización de refs en cada componente.
+3. **UI a través de primitivos:** `Surface`, `SearchField`, `FilterSelect`, `StatusBar`, `Button`, `Pager`, `EmptyState`, `ErrorState`, `ResetButton`, `ItemCard`, `ItemGrid`, `Legend`, `TableShell`. Si un control se repite en dos componentes, conviértelo en primitivo.
+4. **Solo tokens:** usa `--mirla-*` con fallback a `--pico-*`. No hardcodees colores ni espaciados. Las únicas excepciones son la paleta categórica (`src/lib/palette.js`) y valores calculados en runtime.
+5. **Sin estilos inline estáticos:** los atributos `style` solo se permiten para valores dinámicos (posición del slider, color de una celda, alto de un gráfico).
+6. **Shadow DOM:** los custom elements usan Shadow DOM. Las variables CSS heredan, pero los selectores globales del tema no atraviesan la frontera. Usa selectores propios del componente, `:host` o atributos SVG/canvas generados por D3.
+7. **Refs:** los atributos `ref` y `ref:Tabla` pueden llegar como string, array de strings o array de stubs `{ pid, label, images }`. Normalízalos con `toLabels`/`splitValues`.
+8. **Accesibilidad:** botones reales, `aria-label` en iconos, foco visible, navegación por teclado y textos alternativos.
+9. **Pruebas:** extrae la lógica pura a `src/lib/` y añade tests en `*.test.js` con Vitest. No escribas tests de rendering visual ni de layout.
 
 ---
 
 ## Paso 2: Registrar el Componente
 
-Abre el archivo `src/index.js` en tu proyecto Svelte y añade la importación de tu nuevo componente. Esto le indica a Vite que debe incluirlo en el bundle final de Web Components.
+Abre el archivo `src/components/index.js` y añade la importación de tu nuevo componente. Esto le indica a Vite que debe incluirlo en el bundle final de Web Components.
 
 ```javascript
-// src/index.js
-import "./components/MirlaPreview.svelte";
-import "./components/MirlaGallery.svelte";
+// src/components/index.js
+import "./MirlaPreview.svelte";
+import "./MirlaGallery.svelte";
 // ... otros componentes ...
 
-import "./components/MirlaNuevo.svelte"; // Añade tu nuevo componente aquí
+import "./MirlaNuevo.svelte"; // Añade tu nuevo componente aquí
 ```
 
 ---

@@ -282,26 +282,26 @@ No runtime data fetching is allowed for collection data. The only current except
 
 Public custom elements (unchanged names/API):
 
-| Element | Main input | Data source | Shared UI (planned) |
+| Element | Main input | Data source | Shared UI (implemented) |
 |---|---|---|---|
 | `<mirla-index>` | `type`, `filters`, `itemsperpage` | items + protocol | Surface, SearchField, FilterSelect, StatusBar, Pager, ItemGrid |
 | `<mirla-table>` | `title`, `excludedkeys` | items + protocol | Surface, SearchField, StatusBar, TableShell |
 | `<mirla-protocol>` | `title` | protocol | Surface, SearchField, StatusBar, TableShell |
 | `<mirla-gallery>` | `key`, `value`, `limit` | items | ItemGrid |
-| `<mirla-preview>` | `pid`, `title`, `alt`, `page` | items | ItemCard |
-| `<mirla-compare>` | `pid1`, `pid2`, `label1`, `label2` | items | Surface |
-| `<mirla-barchart>` | `key`, `top`, `color`, `usepalette` | items | VizFrame, ResetButton, ItemsBar |
-| `<mirla-waffle>` | `key` | items | VizFrame, ResetButton, Legend, ItemsBar |
-| `<mirla-timeline>` | `datekey`, `color`, `accent` | items | VizFrame, ResetButton, ItemsBar |
-| `<mirla-tree>` | `keys`, `color`, `accent` | items | VizFrame, ResetButton, ItemsBar |
-| `<mirla-network>` | `sourcekey`, `targetkey`, colors | items | VizFrame, ResetButton, ItemsBar |
-| `<mirla-map>` | `coordkey`, `color`, `accent` | items | VizFrame, ResetButton, ItemsBar |
+| `<mirla-preview>` | `pid`, `title`, `alt`, `page` | items | ErrorState |
+| `<mirla-compare>` | `pid1`, `pid2`, `label1`, `label2` | items | ErrorState |
+| `<mirla-barchart>` | `key`, `top`, `color`, `usepalette` | items | ResetButton, ItemsBar, EmptyState |
+| `<mirla-waffle>` | `key` | items | ResetButton, Legend, ItemsBar, ErrorState |
+| `<mirla-timeline>` | `datekey`, `color`, `accent` | items | ResetButton, ItemsBar |
+| `<mirla-tree>` | `keys`, `color`, `accent` | items | ItemsBar, EmptyState |
+| `<mirla-network>` | `sourcekey`, `targetkey`, colors | items | ResetButton, ItemsBar |
+| `<mirla-map>` | `coordkey`, `color`, `accent` | items | ResetButton, ItemsBar |
 
 Build dependencies:
 
 - `d3` and `topojson-client` are bundled into `mirla-components.js`.
 - The bundle is an IIFE (`formats: ['iife']`, `inlineDynamicImports: true`) and must remain a single script file for Publii.
-- Svelte custom elements are built with `emitCss: false`; styles are injected by the bundle. There is no Shadow DOM, so theme tokens are available.
+- Svelte custom elements are built with `emitCss: false` and use **Shadow DOM** (confirmed by `attachShadow` in the bundle). Component styles are injected into the shadow root; CSS custom properties (`--pico-*`, `--mirla-*`) inherit through the shadow boundary, but document-level selectors do not. Use `:host`/scoped selectors for internals, and keep `:global` rules to a minimum.
 
 ---
 
