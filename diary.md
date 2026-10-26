@@ -222,3 +222,56 @@
 **Next**
 - Sprint 2: self-hosted fonts, font presets/stacks, color/layout customization, and shared print settings.
 - Push after approval (user policy).
+
+---
+
+## 2026-10-26 — Sprint 2: self-hosted fonts, colors, print settings
+
+**Branch:** `agent-dev`
+**Scope:** Theme customization: local fonts, font source/pairing, line height, custom colors, and print settings.
+
+**What changed**
+- Added self-hosted fonts under `input/themes/mirlaTheme/assets/fonts/`:
+  - Inter 400/700; Libre Baskerville 700; IBM Plex Sans 400/400 italic/700; Syne variable 400–800; Source Code Pro 400/700.
+  - Latin subsets, ~244 KB total. OFL license texts in `assets/fonts/licenses/`.
+- Added `assets/css/fonts.css` with `@font-face` rules and `font-display: swap`.
+- Added theme settings:
+  - `fontSource`: bundled (default), Google Fonts (legacy), system, custom.
+  - `fontPairing`: current (Inter + Libre Baskerville), print (IBM Plex Sans + Syne), system, custom family names.
+  - `lineHeight`, `customCSS`.
+  - `primaryColor`, `primaryHoverColor` (color pickers).
+  - Print: page width/height, top/bottom/outer/inner margins, body/heading/code fonts, image treatment.
+- `theme-variables.js` now builds quoted font stacks, sanitizes colors/lengths, emits line height, and maps custom primary colors to Pico primary/background/border/focus/hover tokens.
+- `partials/head.hbs` links `fonts.css` and only loads Google Fonts when `fontSource=google`.
+- `page-print.hbs` loads local fonts, uses the print settings, keeps grayscale as the default image treatment, and preserves the zine page/margin defaults.
+- `visual-override.js` appends the advanced `customCSS` field.
+- Updated README, design-system.md, architecture.md, testing.md, and plan.md.
+- Added `scripts/test-theme-variables.js` and wired it into `scripts/test-all.sh`.
+
+**Why**
+- Workshops need typography and print settings without editing CSS or hunting Google Fonts URL segments.
+- Self-hosted fonts remove a runtime network dependency and make printing reliable offline.
+- The color pickers make the theme feel customizable without replacing Pico's color system.
+
+**Verified**
+- `config.json` parses; theme-variable generator tests pass for bundled, print, system, Google, custom, and invalid-color cases.
+- Self-hosted fonts load in Chrome:
+  `document.fonts.check(...)` is true for Inter, Libre Baskerville, IBM Plex Sans, Syne, and Source Code Pro.
+- Generated theme CSS with defaults produces Inter body / Libre Baskerville headings and the existing azure link color.
+- Generated theme CSS with `primaryColor=#ff3366` changes Pico primary and link color to `rgb(255, 51, 102)`.
+- A mock print template renders 4 Paged.js pages with local fonts and the default print settings.
+- `scripts/test-all.sh` passes, including the theme variable/font checks.
+
+**Not verified yet**
+- A real Publii preview with the new theme settings UI. Publii needs a restart to show the new Fonts/Print fields and to regenerate `style.css` with the new variables.
+- Full visual comparison of the print PDF against the old Google-font version. The default font families and page/margin values are unchanged; the actual font files come from the same families.
+
+**Known / follow-up**
+- The shared print base extraction is deferred to Sprint 3, when the catalog template is added.
+- A border-radius control was deferred; existing width controls remain.
+- `--pico-primary-inverse` is not recomputed for custom colors; the UI note asks the user to check contrast.
+- Existing sites with custom Google families must explicitly choose `fontSource=google` (documented).
+
+**Next**
+- Publii preview/restart to confirm the new Fonts/Color/Print settings and default look.
+- Then Sprint 3: print catalog.

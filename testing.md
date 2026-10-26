@@ -49,17 +49,14 @@ Do not add Playwright/Cypress/JSDOM for visual or layout testing. If a future fe
 Commands (component tests exist as of Sprint 1):
 
 ```bash
-# Plugin
-cd mirlaPlugin && npm test
+# Everything currently available
+scripts/test-all.sh
 
-# Components (Vitest, 30 tests)
+# Components only (Vitest, 30 tests)
 cd svelte-components && npm test
-
-# Editor
-cd data-editor && npm test
 ```
 
-At the repository root, a `scripts/test-all.sh` can run the three suites for CI.
+At the repository root, `scripts/test-all.sh` runs the available suites and the theme variable/font checks for CI.
 
 ---
 
@@ -202,7 +199,16 @@ This is also the architecture boundary: if a function needs `fs`, `window`, `doc
   - rejects invalid structures;
   - does not claim to persist images.
 
-### 4.7 Release/build
+### 4.7 Theme variables, fonts, and print settings
+
+- Font source/pairing produce the expected stacks (bundled, Google legacy, system, custom).
+- Invalid colors/lengths are sanitized.
+- Primary colors map to Pico primary/background/border/focus/hover tokens.
+- `customCSS` is appended by `visual-override.js`.
+- Bundled woff2 files and `fonts.css` exist for every advertised family.
+- A mock print render still paginates and uses local fonts.
+
+### 4.8 Release/build
 
 - The component build writes `input/themes/mirlaTheme/assets/js/mirla-components.js`.
 - The plugin ZIP contains `plugin.json`, `main.js`, `item-template.html`, `lib/**`, `papaparse.min.js`, `osd_icons/**`, `LICENSE`.

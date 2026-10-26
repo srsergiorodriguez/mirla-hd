@@ -3,14 +3,12 @@
 var generateOverride = function (params) {
     let output = '';
 
-    // check that the values of the following options (defined in config.json in customConfig section) are the same as those in the main.css file, if so, do not generate the override of this CSS rules
-    // if (params.fontSize !== '1') {
-    //   output += `
-    //   body {
-    //     --pico-font-size: ${params.fontSize}px;
-    //   }`;
-    // }
-    
+    // Advanced theme CSS. This is intentionally raw: it is the escape hatch
+    // for @font-face declarations, extra tokens, and small layout overrides.
+    if (params.customCSS && String(params.customCSS).trim() !== '') {
+        output += `\n/* --- Mirla custom CSS --- */\n${params.customCSS}\n`;
+    }
+
     return output;
 }
 

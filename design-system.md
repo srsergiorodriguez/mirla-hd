@@ -49,6 +49,13 @@ Semantic tokens (implemented; values preserve the previous look):
 | `--mirla-shadow-card` | `var(--pico-card-box-shadow, 0 2px 4px rgba(0,0,0,.05))` | Compact cards (ItemsBar) |
 | `--mirla-border-form` | `var(--pico-form-element-border-color, rgba(0,0,0,.1))` | Media frames and card borders |
 
+Optional custom colors (implemented):
+
+- `primaryColor` and `primaryHoverColor` are color-picker theme options.
+- Empty values keep the selected Pico Color Version.
+- A valid hex primary is mapped to `--pico-primary`, `--pico-primary-background`, `--pico-primary-border`, and `--pico-primary-focus`. If the hover is empty, it is derived with `color-mix(..., #000 15%)`.
+- `--pico-primary-inverse` is not recomputed; check contrast after choosing a light or dark custom color.
+
 Rules:
 
 - Components must not override `--pico-primary` directly. If a component needs a different accent (e.g., a chart series), use the chart palette or a documented `color` prop.
@@ -104,32 +111,42 @@ The editor uses Pico variables plus a small set of legacy accents:
 
 ## 3. Typography
 
-### 3.1 Web defaults (current, and the self-hosted target)
+### 3.1 Web defaults (implemented)
 
-| Role | Family | Current source | Target source | Weights |
-|---|---|---|---|---|
-| Body | Inter | Google Fonts | Theme `assets/fonts/inter/` (woff2) | 400, 700 |
-| Headings | Libre Baskerville | Google Fonts | Theme `assets/fonts/libre-baskerville/` (woff2) | 700 |
-| Code | System monospace | — | System monospace | — |
+| Role | Family | Source | Weights |
+|---|---|---|---|
+| Body | Inter | Theme `assets/fonts/` (woff2) | 400, 700 |
+| Headings | Libre Baskerville | Theme `assets/fonts/` (woff2) | 700 |
+| Code | System monospace | System stack | — |
 
 - Base size: `16px` (`fontSize` theme option, range 12–20).
-- Pico line height: default (`1.5`-ish); the theme currently does not override it.
+- Line height: `1.5` (`lineHeight` theme option, range 1.2–2). This is now an explicit theme setting.
 - Headings use `--pico-font-family-heading` via `main.css`.
-- Fonts currently load from Google Fonts with `display=swap` and preconnect hints.
-- The current theme config exposes four raw text fields: body family name, body URL segment, heading family name, heading URL segment. This is the main usability problem to solve in Phase 2.
-- **Decision (Sprint 0): self-host the bundled fonts.** The default site must not request Google Fonts. Google Fonts remains available as a legacy/advanced `fontSource` option.
+- The default site loads only local fonts. No Google Fonts request is made unless `fontSource=google`.
+- `fontSource` and `fontPairing` replace the manual Google URL workflow for normal use. The four legacy fields remain for Google/custom setups.
+- The optional `customCSS` field is appended after the theme CSS for advanced `@font-face` work.
 
-### 3.2 Print defaults (current)
+### 3.2 Print defaults (implemented)
 
-| Role | Family | Loaded? | Target |
+| Role | Family | Loaded? | Configurable |
 |---|---|---|---|
-| Body | IBM Plex Sans | Yes, in `page-print.hbs` | Bundled woff2 |
-| Headings | Syne | Yes, in `page-print.hbs` | Bundled woff2 |
-| Code | Source Code Pro | **No** — falls back to monospace | Bundle the regular/bold woff2, or document monospace |
+| Body | IBM Plex Sans | Yes, bundled woff2 | `printFontBody` |
+| Headings | Syne | Yes, bundled woff2 (variable 400–800) | `printFontHeading` |
+| Code | Source Code Pro | Yes, bundled woff2 | `printFontCode` |
 
 The zine template uses `11pt` body, `1.3` line-height, `8pt` captions/folios, and `8pt` code. Keep these defaults for visual parity.
 
-### 3.3 Font presets and sources (Phase 2)
+Print settings (Theme → Print):
+
+- `printPageWidth` / `printPageHeight` (defaults `5.5in` / `8.1in`).
+- `printMarginTop` / `printMarginBottom` (defaults `20mm`).
+- `printMarginOuter` (default `13mm`) and `printMarginInner` (default `16mm`, the gutter).
+- `printFontBody` / `printFontHeading` / `printFontCode` (bundled fonts).
+- `printImageTreatment`: `grayscale` (default) or `color`.
+
+The print template links `assets/css/fonts.css` directly, so it does not load the web `style.css`.
+
+### 3.3 Font sources and presets (implemented)
 
 `fontSource` controls where fonts come from:
 
@@ -138,7 +155,7 @@ The zine template uses `11pt` body, `1.3` line-height, `8pt` captions/folios, an
 | `bundled` (default) | Local `@font-face` from `assets/fonts/`, no network | Workshops, offline printing, privacy |
 | `google` | Legacy Google Fonts links from the four raw fields | Existing sites with custom Google fonts |
 | `system` | System UI/monospace stacks | Fastest, zero payload |
-| `custom` | User CSS `@font-face` in `customCSS` | Advanced/self-managed fonts |
+| `custom` | Legacy family-name fields + `customCSS` `@font-face` | Advanced/self-managed fonts |
 
 Bundled `fontPairing` presets:
 
@@ -147,21 +164,22 @@ Bundled `fontPairing` presets:
 | `current` | Inter | Libre Baskerville | Current Mirla look (default) |
 | `print` | IBM Plex Sans | Syne | Editorial/print companion |
 | `system` | System UI stack | System UI stack | Offline, no font payload |
-| `custom` | User CSS | User CSS | Advanced users |
+| `custom` | Legacy family-name fields | Legacy family-name fields | Advanced users |
 
 Every bundled font needs:
 
-- a `woff2` file (prefer `latin` + `latin-ext` subsets, since the collections are Spanish/Portuguese);
+- a `woff2` file (currently the `latin` subset, which covers Spanish/Portuguese accents);
 - an `@font-face` rule in `assets/css/fonts.css` with `font-display: swap`, `font-style`, `font-weight`, and `unicode-range`;
 - a license file under `assets/fonts/licenses/` (SIL OFL) and an entry in the README/release notes.
 
-The theme will:
+The theme now:
 
-- generate a proper font stack with quoted family names and a generic fallback;
-- remove the default Google Fonts preconnect/link tags;
-- expose `fontSize`, `lineHeight`, and a heading scale;
-- allow a `customCSS` field for extra `@font-face` declarations;
-- use bundled fonts in print as well (print pages do not load the main `style.css`, so the print partial must link `fonts.css` or repeat the needed `@font-face` rules).
+- generates a proper font stack with quoted family names and a generic fallback;
+- removes the default Google Fonts preconnect/link tags;
+- exposes `fontSize` and `lineHeight`;
+- allows a `customCSS` field for extra `@font-face` declarations;
+- links `fonts.css` in both the web head and the print template;
+- maps optional custom primary colors to Pico's primary, background, border, focus, and hover tokens.
 
 Font licenses: Inter, Libre Baskerville, IBM Plex Sans, Syne, and Source Code Pro are SIL Open Font License. Keep attribution in the release notes/README.
 

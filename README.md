@@ -47,6 +47,41 @@ El tema de Mirla contiene el estilo visual y las plantillas de página especiali
 
 ---
 
+## Personalizar el tema
+
+El tema incluye sus propias fuentes, así que el sitio funciona sin depender de Google Fonts. Todas las opciones están en **Site settings → Theme** (Configuración del sitio → Tema).
+
+### Tipografía
+
+- **Font source / Fuente tipográfica**: `Bundled` (por defecto, fuentes incluidas en el tema), `Google Fonts` (solo para instalaciones antiguas o fuentes personalizadas), `System fonts` (sin descarga) o `Custom CSS`.
+- **Bundled font pairing**: `Inter + Libre Baskerville` (aspecto actual), `IBM Plex Sans + Syne` (variante editorial/impresa), `System UI` o `Custom family names`.
+- **Font size / Line height**: tamaño base y altura de línea.
+- **Custom CSS**: espacio avanzado para declarar `@font-face` o pequeños ajustes. Se añade al final del CSS del tema.
+
+Las fuentes incluidas son Inter, Libre Baskerville, IBM Plex Sans, Syne y Source Code Pro (subconjunto latino, licencia SIL OFL). Están en `input/themes/mirlaTheme/assets/fonts/`; las licencias, en `assets/fonts/licenses/`. Para añadir otra fuente, coloca el `.woff2` en esa carpeta y declara el `@font-face` en **Custom CSS**.
+
+Si tu sitio ya usaba Google Fonts con familias personalizadas, cambia **Font source** a `Google Fonts` y conserva los cuatro campos de familia/URL que ya tenías.
+
+### Color
+
+- **Color Scheme / Color Version** siguen funcionando como antes.
+- **Custom primary color** y **Custom primary hover color** permiten reemplazar el color de acento de Pico. Déjalos vacíos para usar la versión de color seleccionada. Revisa el contraste del texto sobre botones si eliges un color claro.
+
+### Impresión
+
+La pestaña **Print** controla las plantillas imprimibles (fanzine y, más adelante, catálogo):
+
+- tamaño de página (`printPageWidth` / `printPageHeight`; por defecto `5.5in × 8.1in`);
+- márgenes superior/inferior, exterior e interior (lomo);
+- fuentes de cuerpo, títulos y código (todas incluidas en el tema);
+- tratamiento de imágenes: escala de grises (por defecto para impresión láser) o color.
+
+Los valores por defecto reproducen el diseño actual del fanzine. Los cambios afectan a la página imprimible, no a la web normal.
+
+> Después de actualizar el tema, reinicia Publii para que aparezcan las nuevas opciones de configuración.
+
+---
+
 ## Colecciones digitales
 
 ### 1. Preparar los archivos de tu colección

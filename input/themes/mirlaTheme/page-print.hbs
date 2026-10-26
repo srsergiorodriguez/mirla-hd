@@ -5,25 +5,32 @@
   <meta charset="utf-8">
   <title>{{title}} - {{@website.name}}</title>
 
-  {{!-- Load google fonts --}}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Syne:wght@400..800&display=swap" rel="stylesheet">
+  {{!-- Self-hosted fonts; no Google Fonts request --}}
+  <link rel="stylesheet" href="{{css "fonts.css"}}">
 
   <style>
     :root {
-      --page-width: 5.5in;
-      --page-height: 8.1in;
+      --page-width: {{@config.custom.printPageWidth}};
+      --page-height: {{@config.custom.printPageHeight}};
+
+      /* Print margins: outer = outside edge, inner = binding edge. */
+      --print-margin-top: {{@config.custom.printMarginTop}};
+      --print-margin-bottom: {{@config.custom.printMarginBottom}};
+      --print-margin-outer: {{@config.custom.printMarginOuter}};
+      --print-margin-inner: {{@config.custom.printMarginInner}};
 
       /* Typography Variables */
-      --font-body: "IBM Plex Sans", sans-serif;
-      --font-heading: "Syne", sans-serif;
-      --font-code: 'Source Code Pro', monospace;
+      --font-body: "{{@config.custom.printFontBody}}", sans-serif;
+      --font-heading: "{{@config.custom.printFontHeading}}", sans-serif;
+      --font-code: "{{@config.custom.printFontCode}}", monospace;
       --size-code: 8pt;
+
+      /* Grayscale is the default for B&W laser printing. */
+      --print-image-filter: {{#checkIf @config.custom.printImageTreatment '==' 'color'}}none{{else}}grayscale(100%) brightness(120%) contrast(120%){{/checkIf}};
     }
 
     img, canvas {
-      filter: grayscale(100%) brightness(120%) contrast(120%); /* For improving B&W, laser printed publications */
+      filter: var(--print-image-filter);
     }
 
     body {
@@ -54,8 +61,8 @@
 
     /* Page config */
     @page {
-      /* top, right, bottom, left */ 
-      margin: 20mm 13mm 20mm 13mm;
+      /* top, outer, bottom, outer — the inner gutter is set below */
+      margin: {{@config.custom.printMarginTop}} {{@config.custom.printMarginOuter}} {{@config.custom.printMarginBottom}} {{@config.custom.printMarginOuter}};
 
       @top-center {
         /* Page name name */
@@ -75,7 +82,7 @@
 
     /* Even pages, left */
     @page :left {
-      margin-right: 16mm;
+      margin-right: {{@config.custom.printMarginInner}};
       /* Uncomment this when using sidenotes: */
       /* margin-left: 40mm;  */
 
@@ -90,7 +97,7 @@
 
     /* Odd pages, right */
     @page :right {
-      margin-left: 16mm;
+      margin-left: {{@config.custom.printMarginInner}};
       /* Uncomment this when using sidenotes: */
       /* margin-right: 40mm;  */
       
@@ -99,7 +106,7 @@
         font-family: var(--font-heading);
         font-size: 8pt;
         /* This can be used to adjust the page number when using sidenotes: */
-        /* text-align: center; *//
+        /* text-align: center; */
       }
     }
 

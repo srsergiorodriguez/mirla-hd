@@ -146,6 +146,22 @@
             ]
         },
         {
+            "name": "primaryColor",
+            "label": "Custom primary color",
+            "group": "General",
+            "note": "Optional. Leave empty to use the Pico Color Version. Check contrast after overriding.",
+            "value": "",
+            "type": "colorpicker"
+        },
+        {
+            "name": "primaryHoverColor",
+            "label": "Custom primary hover color",
+            "group": "General",
+            "note": "Optional. Leave empty to derive it from the primary color.",
+            "value": "",
+            "type": "colorpicker"
+        },
+        {
             "name": "separator",
             "type": "separator",
             "label": "Favicon",
@@ -240,10 +256,56 @@
             "step": 1
         },
         {
-            "label": "Google Fonts Configuration",
+            "name": "lineHeight",
+            "label": "Line height",
+            "group": "Fonts",
+            "note": "Body text line height. 1.5 is the current default.",
+            "value": "1.5",
+            "type": "range",
+            "min": 1.2,
+            "max": 2,
+            "step": 0.05
+        },
+        {
+            "name": "separator",
+            "type": "separator",
+            "label": "Font source",
+            "group": "Fonts",
+            "size": "small",
+            "note": "Bundled fonts are served from the theme and need no network connection. Google Fonts is kept for existing custom setups."
+        },
+        {
+            "name": "fontSource",
+            "label": "Font source",
+            "group": "Fonts",
+            "value": "bundled",
+            "type": "select",
+            "options": [
+                {"label": "Bundled (self-hosted, no network)", "value": "bundled"},
+                {"label": "Google Fonts (legacy)", "value": "google"},
+                {"label": "System fonts", "value": "system"},
+                {"label": "Custom CSS", "value": "custom"}
+            ]
+        },
+        {
+            "name": "fontPairing",
+            "label": "Bundled font pairing",
+            "group": "Fonts",
+            "note": "Used when Font source is Bundled.",
+            "value": "current",
+            "type": "select",
+            "options": [
+                {"label": "Current — Inter + Libre Baskerville", "value": "current"},
+                {"label": "Print / editorial — IBM Plex Sans + Syne", "value": "print"},
+                {"label": "System UI", "value": "system"},
+                {"label": "Custom family names", "value": "custom"}
+            ]
+        },
+        {
+            "label": "Google Fonts / custom font fields",
             "group": "Fonts",
             "type": "separator",
-            "note": "To customize your fonts: <br>1. Go to <a href='https://fonts.google.com' target='_blank'>fonts.google.com</a> and select your styles.<br>2. In the 'Embed Code' section, look for the <code>family=</code> part of the URL.<br>3. Copy the part after the equals sign into the <b>URL Segment</b> field (e.g., <code>Libre+Baskerville:wght@700</code>).<br>4. Enter the simple name in the <b>Family Name</b> field (e.g., <code>Libre Baskerville</code>)."
+            "note": "Only used when Font source is Google Fonts or Custom. To use Google Fonts: <br>1. Go to <a href='https://fonts.google.com' target='_blank'>fonts.google.com</a> and select your styles.<br>2. In the 'Embed Code' section, look for the <code>family=</code> part of the URL.<br>3. Copy the part after the equals sign into the <b>URL Segment</b> field (e.g., <code>Libre+Baskerville:wght@700</code>).<br>4. Enter the simple name in the <b>Family Name</b> field (e.g., <code>Libre Baskerville</code>)."
         },
         {
             "name": "fontHeadingsName",
@@ -276,6 +338,135 @@
             "note": "(e.g. Inter:wght@400;700)",
             "value": "Inter:wght@400;700",
             "type": "text"
+        },
+        {
+            "name": "customCSS",
+            "label": "Custom CSS (advanced)",
+            "group": "Fonts",
+            "note": "Optional CSS appended to the theme. Use it for extra @font-face declarations or small overrides.",
+            "value": "",
+            "type": "textarea",
+            "rows": 6
+        },
+        {
+            "name": "separator",
+            "type": "separator",
+            "label": "Print page",
+            "group": "Print",
+            "size": "small",
+            "note": "Used by the Printable Page Template (zines) and the upcoming catalog template. The default is a 5.5 × 8.1in zine."
+        },
+        {
+            "name": "printPageWidth",
+            "label": "Print page width",
+            "group": "Print",
+            "note": "CSS length, e.g. 5.5in, 148mm, 105mm.",
+            "value": "5.5in",
+            "type": "text"
+        },
+        {
+            "name": "printPageHeight",
+            "label": "Print page height",
+            "group": "Print",
+            "note": "CSS length, e.g. 8.1in, 210mm, 148mm.",
+            "value": "8.1in",
+            "type": "text"
+        },
+        {
+            "name": "separator",
+            "type": "separator",
+            "label": "Print margins",
+            "group": "Print",
+            "size": "small",
+            "note": "Outer is the outside edge; inner is the binding edge (gutter). The default preserves the current zine layout."
+        },
+        {
+            "name": "printMarginTop",
+            "label": "Top margin",
+            "group": "Print",
+            "value": "20mm",
+            "type": "text"
+        },
+        {
+            "name": "printMarginBottom",
+            "label": "Bottom margin",
+            "group": "Print",
+            "value": "20mm",
+            "type": "text"
+        },
+        {
+            "name": "printMarginOuter",
+            "label": "Outer margin",
+            "group": "Print",
+            "value": "13mm",
+            "type": "text"
+        },
+        {
+            "name": "printMarginInner",
+            "label": "Inner (gutter) margin",
+            "group": "Print",
+            "value": "16mm",
+            "type": "text"
+        },
+        {
+            "name": "separator",
+            "type": "separator",
+            "label": "Print typography",
+            "group": "Print",
+            "size": "small",
+            "note": "All options below are bundled with the theme and work offline."
+        },
+        {
+            "name": "printFontBody",
+            "label": "Print body font",
+            "group": "Print",
+            "value": "IBM Plex Sans",
+            "type": "select",
+            "options": [
+                {"label": "IBM Plex Sans", "value": "IBM Plex Sans"},
+                {"label": "Inter", "value": "Inter"},
+                {"label": "Libre Baskerville", "value": "Libre Baskerville"},
+                {"label": "Syne", "value": "Syne"},
+                {"label": "Source Code Pro", "value": "Source Code Pro"}
+            ]
+        },
+        {
+            "name": "printFontHeading",
+            "label": "Print heading font",
+            "group": "Print",
+            "value": "Syne",
+            "type": "select",
+            "options": [
+                {"label": "Syne", "value": "Syne"},
+                {"label": "IBM Plex Sans", "value": "IBM Plex Sans"},
+                {"label": "Inter", "value": "Inter"},
+                {"label": "Libre Baskerville", "value": "Libre Baskerville"},
+                {"label": "Source Code Pro", "value": "Source Code Pro"}
+            ]
+        },
+        {
+            "name": "printFontCode",
+            "label": "Print code font",
+            "group": "Print",
+            "value": "Source Code Pro",
+            "type": "select",
+            "options": [
+                {"label": "Source Code Pro", "value": "Source Code Pro"},
+                {"label": "IBM Plex Sans", "value": "IBM Plex Sans"},
+                {"label": "Inter", "value": "Inter"}
+            ]
+        },
+        {
+            "name": "printImageTreatment",
+            "label": "Print image treatment",
+            "group": "Print",
+            "note": "Grayscale is the current default for black-and-white laser printing.",
+            "value": "grayscale",
+            "type": "select",
+            "options": [
+                {"label": "Grayscale / high contrast", "value": "grayscale"},
+                {"label": "Color / original", "value": "color"}
+            ]
         }
     ],
     "authorConfig": [

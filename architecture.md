@@ -390,12 +390,12 @@ These are recorded here so future changes do not silently break them:
 1. **Plugin is a single 555-line CommonJS file.** Parsing, validation, media resolution, HTML rendering, and file writing are interleaved. It has no tests and injects CSV values into HTML without escaping.
 2. **Theme context script is duplicated** in three templates.
 3. **`zine.js` exists twice**, and the root copy is stale.
-4. **Font configuration is manual**: four text fields requiring the user to extract Google Fonts URL segments.
+4. **Fonts are self-hosted by default** (Sprint 2): Inter, Libre Baskerville, IBM Plex Sans, Syne, and Source Code Pro. Google Fonts remains only as a legacy/advanced `fontSource`.
 5. **Print CSS is inline** in `page-print.hbs` and hardcodes fonts/page size.
 6. **Catalog does not exist**; the crossmedia workflow only prints an authored page (zine).
 7. **Data editor is a single 1,313-line HTML file** with CDN dependencies, inline styles, and imperative DOM code.
 8. **Generated artifacts are tracked**: `assets/css/style.css` and `assets/js/mirla-components.js`. CI must rebuild them; humans must not edit them.
-9. **Runtime CDN dependencies**: Pico, Shoelace, Google Fonts, OpenSeadragon, unpkg world atlas. Offline workshops need network unless these are self-hosted.
+9. **Runtime CDN dependencies**: Pico, Shoelace, OpenSeadragon, unpkg world atlas. Google Fonts is no longer loaded by default (fonts are bundled); offline workshops still need a plan for the remaining CDNs.
 10. **SEO of item pages**: generated item pages keep the template page's canonical URL and are not in the sitemap. Not in the current scope, but worth a later task.
 11. **Plugin report is written into the input collection folder**, so a build modifies the source tree. Consider moving it to `output/` in a later cleanup.
 12. **Docs drift**: `README.md`, `svelte-components/README.md`, and `DesarrollarComponentes.md` disagree on prop names (`date-key` vs `datekey`) and plugin options (`galleryFilters`). Fix during the relevant phase.

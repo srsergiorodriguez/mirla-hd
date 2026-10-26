@@ -47,19 +47,24 @@
       {{/if}}  
       {{! /check if pagination exists}}
 
-      {{! import pico css }}
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      {{! self-hosted Mirla fonts (no network request by default) }}
+      <link rel="stylesheet" href="{{css "fonts.css"}}">
 
-      {{#if @config.custom.fontBodyURL}}
-         <link href="https://fonts.googleapis.com/css2?family={{@config.custom.fontBodyURL}}&display=swap" rel="stylesheet">
-      {{/if}}
+      {{! legacy Google Fonts source, only when explicitly selected }}
+      {{#checkIf @config.custom.fontSource '==' 'google'}}
+         <link rel="preconnect" href="https://fonts.googleapis.com">
+         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-      {{#if @config.custom.fontHeadingsURL}}
-         {{#checkIf @config.custom.fontBodyURL '!=' @config.custom.fontHeadingsURL}}
-            <link href="https://fonts.googleapis.com/css2?family={{@config.custom.fontHeadingsURL}}&display=swap" rel="stylesheet">
-         {{/checkIf}}
-      {{/if}}
+         {{#if @config.custom.fontBodyURL}}
+            <link href="https://fonts.googleapis.com/css2?family={{@config.custom.fontBodyURL}}&display=swap" rel="stylesheet">
+         {{/if}}
+
+         {{#if @config.custom.fontHeadingsURL}}
+            {{#checkIf @config.custom.fontBodyURL '!=' @config.custom.fontHeadingsURL}}
+               <link href="https://fonts.googleapis.com/css2?family={{@config.custom.fontHeadingsURL}}&display=swap" rel="stylesheet">
+            {{/checkIf}}
+         {{/if}}
+      {{/checkIf}}
       
       {{! import pico css }}
       {{!-- <link rel="stylesheet" href="{{css "pico.fluid.classless.jade.min.css" }}"> --}}

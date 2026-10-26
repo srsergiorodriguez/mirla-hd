@@ -47,6 +47,14 @@ for json in mirlaPlugin/plugin.json input/themes/mirlaTheme/config.json input/co
   fi
 done
 
+section "Theme: variables, fonts, and print settings"
+if node scripts/test-theme-variables.js; then
+  echo "OK: theme variables and fonts"
+else
+  echo "FAIL: theme variables and fonts"
+  FAIL=1
+fi
+
 section "Components: tests"
 if [[ -f svelte-components/package.json ]]; then
   if has_script "svelte-components/package.json" "test"; then

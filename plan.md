@@ -1,6 +1,6 @@
 # Mirla Plan — Active Sprint
 
-> Branch: `agent-dev`. Status: **Sprint 1 complete; Sprint 2 next**.
+> Branch: `agent-dev`. Status: **Sprint 2 implemented; Publii preview pending**.
 > Last updated: 2026-10-26.
 
 The work is split into sequential sprints. Only the sprint marked **ACTIVE** is implemented at a time. Do not start the next sprint until the current acceptance criteria are met and `diary.md` is updated.
@@ -9,9 +9,9 @@ The work is split into sequential sprints. Only the sprint marked **ACTIVE** is 
 
 ## Sprint status
 
-**Completed:** Sprint 0 (foundations, plugin dev loop) and Sprint 1 (design system, parity refactor).
+**Completed:** Sprint 0 (foundations, plugin dev loop), Sprint 1 (design system, parity refactor), and Sprint 2 implementation (self-hosted fonts, colors, print settings).
 
-**Next:** Sprint 2 (versatile customization: self-hosted fonts, colors, layout, print).
+**Next:** confirm Sprint 2 in Publii, then Sprint 3 (print catalog).
 
 
 ### Sprint 0 — Foundations, docs, and the plugin dev loop
@@ -129,45 +129,46 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 
 ## Sprint 2 — Versatile customization
 
-**Status:** not started.
+**Status:** implemented; waiting for a real Publii preview.
 
 **Goal:** make the common workshop customizations possible from Publii settings, without editing code.
 
 ### 2.1 Web typography (self-hosted)
 
-- [ ] Add `assets/fonts/` with the bundled woff2 files and their OFL license files.
-- [ ] Add `assets/css/fonts.css` with `@font-face` declarations (`font-display: swap`, `latin` + `latin-ext` subsets).
-- [ ] Add `fontSource` select: `bundled` (default), `google` (legacy), `system`, `custom`.
-- [ ] Add `fontPairing` select for bundled fonts: `current` (Inter + Libre Baskerville), `print`/`editorial` (IBM Plex Sans + Syne), `system`, `custom`.
-- [ ] Add proper font stacks (quoted families + generic fallback) in `theme-variables.js`.
-- [ ] Add `lineHeight` and heading scale options.
-- [ ] Remove the default Google Fonts `<link>`s; load them only when `fontSource=google` (legacy sites preserve their behavior).
-- [ ] Keep the four legacy fields for `custom`/`google` and existing sites.
-- [ ] Add a `customCSS` textarea for `@font-face`/advanced overrides.
-- [ ] Validate/sanitize family names; fail gracefully with a readable warning.
-- [ ] Check total theme size and document the font payload.
+- [x] Add `assets/fonts/` with the bundled woff2 files and their OFL license files.
+- [x] Add `assets/css/fonts.css` with `@font-face` declarations (`font-display: swap`, Latin subset).
+- [x] Add `fontSource` select: `bundled` (default), `google` (legacy), `system`, `custom`.
+- [x] Add `fontPairing` select for bundled fonts: `current` (Inter + Libre Baskerville), `print`/`editorial` (IBM Plex Sans + Syne), `system`, `custom`.
+- [x] Add proper font stacks (quoted families + generic fallback) in `theme-variables.js`.
+- [x] Add `lineHeight`; heading scale remains a later refinement.
+- [x] Remove the default Google Fonts `<link>`s; load them only when `fontSource=google`.
+- [x] Keep the four legacy fields for `custom`/`google` and existing sites.
+- [x] Add a `customCSS` textarea for `@font-face`/advanced overrides.
+- [x] Validate/sanitize family names, lengths, and colors; invalid values fall back safely.
+- [x] Check total theme size (~244 KB of fonts) and document the payload.
 
 ### 2.2 Color and layout
 
-- [ ] Optional `primaryColor` / `primaryHoverColor` color pickers.
-- [ ] Optional border radius and content width controls (with current values as defaults).
-- [ ] Document contrast considerations for custom colors.
+- [x] Optional `primaryColor` / `primaryHoverColor` color pickers.
+- [x] Map custom colors to Pico primary/background/border/focus/hover tokens.
+- [ ] Optional border radius control (deferred; the existing width controls cover the common layout need).
+- [x] Document contrast considerations for custom colors.
 
 ### 2.3 Print customization
 
-- [ ] Extract shared print styles into a partial (`partials/print-base.hbs` or a CSS asset).
-- [ ] Add print page-size preset + custom width/height.
-- [ ] Add print margins (top/right/bottom/left).
-- [ ] Add print body/heading/code font options using the bundled fonts (defaults: IBM Plex Sans, Syne, Source Code Pro).
-- [ ] Load Source Code Pro/IBM Plex Mono from the bundled fonts or document the monospace fallback.
-- [ ] Add print image treatment (default grayscale for zines).
-- [ ] Keep the current zine output identical with defaults.
+- [x] Add print page width/height settings (default 5.5 × 8.1in).
+- [x] Add print margins: top, bottom, outer, inner/gutter (defaults preserve the current zine).
+- [x] Add print body/heading/code font options using the bundled fonts (defaults: IBM Plex Sans, Syne, Source Code Pro).
+- [x] Load Source Code Pro from the bundled fonts.
+- [x] Add print image treatment (grayscale default, color option).
+- [x] Keep the current zine output identical with defaults (confirmed by a mock Paged.js render: 4 pages, local fonts).
+- [ ] Extract the shared print base into a partial when adding the catalog (Sprint 3); the current print CSS stays inline for parity.
 
 ### 2.4 Docs
 
-- [ ] "How to use a font" recipes: bundled preset, system stack, custom `@font-face`, and legacy Google Fonts.
-- [ ] Document all new theme options with examples.
-- [ ] Update README (and remove the old manual URL-segment instructions).
+- [x] "How to use a font" recipes: bundled preset, system stack, custom `@font-face`, and legacy Google Fonts.
+- [x] Document all new theme options with examples.
+- [x] Update README with the new Fonts/Color/Print settings.
 
 **Acceptance:**
 
