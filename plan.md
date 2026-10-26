@@ -11,25 +11,31 @@ The work is split into sequential sprints. Only the sprint marked **ACTIVE** is 
 
 ### Sprint 0 — Foundations, docs, and the plugin dev loop
 
-**Status:** planning done; implementation pending approval.
+**Status:** implementation complete; one manual Publii GUI preview check pending.
 
 **Goal:** one codebase, one branch, and a documented contract before touching UI code.
 
 - [x] Audit the current plugin, theme, components, editor, print layer, and release workflow.
 - [x] Create the `agent-dev` branch.
 - [x] Write `architecture.md`, `design-system.md`, `testing.md`, `plan.md`, `diary.md`.
-- [ ] Approve the symlink procedure and run it on the local Publii installation.
-- [ ] Add `scripts/link-plugin.sh` (dry-run by default, explicit paths, backup, verification, rollback).
-- [ ] Add a Windows-friendly fallback (`scripts/link-plugin.ps1` with a junction, or `scripts/sync-plugin.sh`).
-- [ ] Add `scripts/test-all.sh` and `scripts/build-all.sh` skeletons.
-- [ ] Add a CI workflow for tests/builds on branch pushes (no release).
-- [ ] Verify: edit a marker string in `mirlaPlugin/main.js`, restart Publii, run a preview, confirm the marker appears in the generated item page or report.
-- [ ] Record the verification in `diary.md`.
+- [x] Approve the symlink procedure and run it on the local Publii installation.
+- [x] Back up the installed plugin outside `plugins/` (`plugin-backups/mirlaPlugin-20261026-101249`).
+- [x] Add `scripts/link-plugin.sh` (dry-run by default, explicit paths, backup, verification, rollback).
+- [x] Add `scripts/unlink-plugin.sh` (dry-run by default, restore latest/specific backup).
+- [x] Add a Windows-friendly fallback (`scripts/link-plugin.ps1` with a junction).
+- [x] Add `scripts/check-plugin-loader.js` (reproduces Publii's discovery/require path).
+- [x] Add `scripts/test-all.sh` and `scripts/build-all.sh`.
+- [x] Add a CI workflow for tests/builds on branch pushes (no release).
+- [x] Verify the symlink at the loader level (`is symlink: true`, `main.js` resolved from the repo).
+- [x] Verify the plugin's full `processDataset` path against a temporary collection (56 items, 56 item pages, JSON + report).
+- [x] Verify link/unlink/rollback in an isolated temporary Publii home.
+- [ ] Restart Publii and run a real preview/publish (GUI check; user confirmation pending).
+- [x] Record the verification in `diary.md`.
 
 **Acceptance:**
 
 - `~/Documents/Publii/plugins/mirlaPlugin` resolves to `mirla-hd/mirlaPlugin`.
-- A Publii preview uses the repo source; no copy step is needed.
+- A Publii preview uses the repo source; no copy step is needed. *(Loader and full plugin smoke verified; GUI preview pending.)*
 - The release workflow zips the same repo folder.
 - Rolling back restores the pre-existing installed plugin.
 - No application code has changed yet.
@@ -112,15 +118,19 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 
 **Goal:** make the common workshop customizations possible from Publii settings, without editing code.
 
-### 2.1 Web typography
+### 2.1 Web typography (self-hosted)
 
-- [ ] Add `fontPairing` select with `current`, `editorial`, `modern`, `mono`, `system`, `custom`.
+- [ ] Add `assets/fonts/` with the bundled woff2 files and their OFL license files.
+- [ ] Add `assets/css/fonts.css` with `@font-face` declarations (`font-display: swap`, `latin` + `latin-ext` subsets).
+- [ ] Add `fontSource` select: `bundled` (default), `google` (legacy), `system`, `custom`.
+- [ ] Add `fontPairing` select for bundled fonts: `current` (Inter + Libre Baskerville), `print`/`editorial` (IBM Plex Sans + Syne), `system`, `custom`.
 - [ ] Add proper font stacks (quoted families + generic fallback) in `theme-variables.js`.
 - [ ] Add `lineHeight` and heading scale options.
-- [ ] Add a single combined Google Fonts link per preset (or a partial with conditional links).
-- [ ] Keep the four legacy fields for `custom` and existing sites.
+- [ ] Remove the default Google Fonts `<link>`s; load them only when `fontSource=google` (legacy sites preserve their behavior).
+- [ ] Keep the four legacy fields for `custom`/`google` and existing sites.
 - [ ] Add a `customCSS` textarea for `@font-face`/advanced overrides.
-- [ ] Validate/sanitize family names and URL segments; fail gracefully with a readable warning.
+- [ ] Validate/sanitize family names; fail gracefully with a readable warning.
+- [ ] Check total theme size and document the font payload.
 
 ### 2.2 Color and layout
 
@@ -133,26 +143,28 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 - [ ] Extract shared print styles into a partial (`partials/print-base.hbs` or a CSS asset).
 - [ ] Add print page-size preset + custom width/height.
 - [ ] Add print margins (top/right/bottom/left).
-- [ ] Add print body/heading/code font options (defaults: IBM Plex Sans, Syne, Source Code Pro/monospace).
+- [ ] Add print body/heading/code font options using the bundled fonts (defaults: IBM Plex Sans, Syne, Source Code Pro).
+- [ ] Load Source Code Pro/IBM Plex Mono from the bundled fonts or document the monospace fallback.
 - [ ] Add print image treatment (default grayscale for zines).
-- [ ] Load Source Code Pro if it is kept, or document the monospace fallback.
 - [ ] Keep the current zine output identical with defaults.
 
 ### 2.4 Docs
 
-- [ ] "How to add a font" recipes: Google Fonts preset, system font, self-hosted `@font-face`, print font.
+- [ ] "How to use a font" recipes: bundled preset, system stack, custom `@font-face`, and legacy Google Fonts.
 - [ ] Document all new theme options with examples.
 - [ ] Update README (and remove the old manual URL-segment instructions).
 
 **Acceptance:**
 
 - A user can change body/heading fonts, base size, line height, width, and print page size from Publii settings.
-- Existing sites with the old config look unchanged.
-- No manual Google Fonts URL copying is required for the presets.
+- Default fonts are served from the theme; no Google Fonts request is made unless `fontSource=google`.
+- Existing sites with the old default config look unchanged.
+- Existing sites that used custom Google Fonts can switch to `fontSource=google` without losing their settings.
+- No manual Google Fonts URL copying is required for the bundled presets.
 - Print defaults remain visually identical.
 - Theme config schema and docs match.
 
-**Out of scope:** arbitrary font uploads, per-page typography, a full color theme editor.
+**Out of scope:** arbitrary font uploads through the Publii UI, per-page typography, a full color theme editor.
 
 ---
 
@@ -166,15 +178,17 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 - [ ] Add `addModifiers()` and an `htmlOutput` modifier that replaces `[MIRLA_CATALOG]`.
 - [ ] Ensure the modifier only acts when the placeholder is present; no-op otherwise.
 - [ ] Make missing template/catalog pages warnings, not fatal errors, in single-page previews.
-- [ ] Add plugin settings:
-  - `catalogFields` (comma-separated; empty = sensible default text fields);
-  - `catalogSort` + `catalogSortDir`;
-  - `catalogColumns` (1/2/3);
-  - `catalogItemsPerPage`;
-  - `catalogImageSource` (main/thumb);
-  - `catalogImageTreatment` (color/grayscale);
-  - `catalogShowMetaLabels` (checkbox);
+- [ ] Add plugin settings (defaults confirmed):
+  - `catalogFields` (default `label,autores,fecha,medio_impresion`; if none of those exist in the protocol, fall back to the first four non-media attributes);
+  - `catalogSort` + `catalogSortDir` (default `label`, `asc`);
+  - `catalogColumns` (default `2`; options 1/2/3);
+  - `catalogItemsPerPage` (default `6`);
+  - `catalogImageSource` (default `main`; options main/thumb);
+  - `catalogImageTreatment` (default `grayscale`; options color/grayscale);
+  - `catalogShowMetaLabels` (default `true`);
   - maybe `catalogGroupBy` (stretch; not v1 unless trivial).
+- [ ] Catalog v1 includes main-table items only; secondary-table items are a follow-up.
+- [ ] Reuse the print page size from Sprint 2 (default 5.5×8.1in).
 - [ ] Render static, escaped catalog HTML:
   - cover/title block? Prefer authored page content; plugin inserts item sheets only.
   - item cards with image, label, selected metadata;
@@ -292,15 +306,21 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 
 ---
 
-## Open decisions (need approval before the relevant sprint)
+## Decisions
 
-1. **Run the plugin symlink now?** It changes `~/Documents/Publii/plugins` outside the repo. Proposed: yes, after backing up the installed copy.
-2. **Push `agent-dev` to origin?** Proposed: keep local until the first sprint is stable, then push.
-3. **Catalog defaults:** page size (reuse 5.5×8.1in?), 2 columns, 6 items/page, fields `label, autores, fecha, medio_impresion`, main images, grayscale. Confirm or adjust.
-4. **Catalog scope:** main table only for v1, or include secondary tables? Proposed: main only.
-5. **Fonts:** Google presets + system + custom; self-hosted fonts later. Confirm.
+Resolved:
+
+1. **Plugin symlink:** approved and applied in Sprint 0. The installed plugin was backed up to `plugin-backups/mirlaPlugin-20261026-101249` and replaced with a symlink to the repo.
+2. **Catalog defaults:** confirmed — 2 columns, 6 items/page, fields `label,autores,fecha,medio_impresion`, main images, grayscale, `label` ascending.
+3. **Catalog scope:** main table only for v1.
+4. **Fonts:** self-hosted bundled fonts (preferred over Google Fonts presets). Google Fonts remains only as a legacy/advanced source.
+5. **Push policy:** push after each sprint, but only after explicit approval. No automatic pushes.
+
+Still open (needed before the relevant sprint):
+
 6. **Editor artifact:** keep the built `MirlaDataEditor.html` tracked at the repo root (current behavior), or build only into releases? Proposed: keep the root artifact for workshop convenience, generated by CI.
 7. **Color customization:** add custom primary color pickers, or stay with Pico color versions? Proposed: add optional pickers with a contrast warning.
+8. **Custom font uploads:** bundled presets + custom `@font-face` CSS for now; investigate a Publii upload field only if it supports woff2 cleanly.
 
 ---
 

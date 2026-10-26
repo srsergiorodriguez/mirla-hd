@@ -311,7 +311,7 @@ Build dependencies:
 
 `~/Documents/Publii/plugins/mirlaPlugin` becomes a **symlink** to `mirla-hd/mirlaPlugin`. Publii then loads the exact source used by GitHub Actions; there is no copy to keep in sync.
 
-### Why this is expected to work
+### Why this works (verified in Sprint 0)
 
 From Publii 0.47.5:
 
@@ -321,38 +321,44 @@ From Publii 0.47.5:
 - Plugin asset reads use `__dirname` inside the real plugin folder, so `osd_icons/` and `item-template.html` resolve correctly.
 - The site-specific settings file remains `input/config/plugins/mirlaPlugin.json`; it is not inside the plugin folder.
 
-### Procedure (to be executed only after approval)
+Sprint 0 verification:
+
+- `~/Documents/Publii/plugins/mirlaPlugin` is a symlink to the repo plugin.
+- `scripts/check-plugin-loader.js` reproduces Publii's `readdir`/`stat`/`require` path and reports `is symlink: true`, resolving `main.js` from the repository.
+- The plugin's full `processDataset` path was run against a temporary copy of the collection: 56 items (51 main + 5 secondary), 56 item pages, JSON payload, and report generated.
+- A real Publii preview/publish still needs a manual GUI check after restarting the app.
+
+### Procedure
+
+The safe, repeatable path is the script. It backs the installed copy up **outside** `plugins/` (so Publii does not list it as a second plugin), creates the link, and verifies the result.
 
 ```bash
-# 1. Inspect
-PLUGIN_SRC="$HOME/Documents/Publii/sites/mirla-hd/mirlaPlugin"
-PLUGIN_DST="$HOME/Documents/Publii/plugins/mirlaPlugin"
-test -d "$PLUGIN_SRC" && test -d "$PLUGIN_DST"
-
-# 2. Back up the installed copy (do not delete it)
-mv "$PLUGIN_DST" "$PLUGIN_DST.bak-$(date +%Y%m%d-%H%M%S)"
-
-# 3. Link
-ln -s "$PLUGIN_SRC" "$PLUGIN_DST"
-
-# 4. Verify
-ls -la "$HOME/Documents/Publii/plugins/"
-test -f "$PLUGIN_DST/main.js"
+scripts/link-plugin.sh            # dry run
+scripts/link-plugin.sh --apply    # back up + create the symlink
+node scripts/check-plugin-loader.js
 ```
 
-Then restart Publii, open the site, confirm the plugin is listed/enabled, run a preview, and check `input/media/files/collection/mirla-report.txt`. Rollback: remove the symlink and rename the backup back.
+Rollback:
+
+```bash
+scripts/unlink-plugin.sh          # dry run
+scripts/unlink-plugin.sh --apply  # remove the symlink, restore the latest backup
+```
+
+The backup lives in `$PUBLII_HOME/plugin-backups/mirlaPlugin-<timestamp>/`. In Sprint 0 the installed copy was backed up there and the symlink was created.
 
 ### Rules
 
 - Never run the link script with a wildcard or an unverified destination.
+- Never place the backup inside `plugins/`; Publii would discover it as a second plugin.
 - The installed backup stays until the symlink has survived one full preview + one full publish.
-- On Windows, use a directory junction (`mklink /J`) or a sync script; a plain copy reintroduces drift.
+- On Windows, use `scripts/link-plugin.ps1` (directory junction). A plain copy reintroduces drift.
 - Publii caches `require`d plugins. Restart the app after plugin changes; a preview alone is not guaranteed to reload the module.
 - GitHub Actions must zip `mirla-hd/mirlaPlugin` directly. No copy step.
 
 ### Fallback (if symlinks are unacceptable)
 
-Add `scripts/sync-plugin.sh` with an explicit source/destination and a `--watch` mode (rsync), plus a CI check that the installed copy is identical. This is second choice: it still duplicates bytes, but removes manual copying.
+Use `scripts/sync-plugin.sh` (to be added only if needed) with an explicit source/destination and a `--watch` mode (rsync), plus a CI check that the installed copy is identical. This is second choice: it still duplicates bytes, but removes manual copying.
 
 ---
 

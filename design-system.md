@@ -102,50 +102,64 @@ The editor uses Pico variables plus a small set of legacy accents:
 
 ## 3. Typography
 
-### 3.1 Web defaults (current)
+### 3.1 Web defaults (current, and the self-hosted target)
 
-| Role | Family | Google Fonts URL segment | Weights |
-|---|---|---|---|
-| Body | Inter | `Inter:wght@400;700` | 400, 700 |
-| Headings | Libre Baskerville | `Libre+Baskerville:wght@700` | 700 |
-| Code | System monospace | — | — |
+| Role | Family | Current source | Target source | Weights |
+|---|---|---|---|---|
+| Body | Inter | Google Fonts | Theme `assets/fonts/inter/` (woff2) | 400, 700 |
+| Headings | Libre Baskerville | Google Fonts | Theme `assets/fonts/libre-baskerville/` (woff2) | 700 |
+| Code | System monospace | — | System monospace | — |
 
 - Base size: `16px` (`fontSize` theme option, range 12–20).
 - Pico line height: default (`1.5`-ish); the theme currently does not override it.
 - Headings use `--pico-font-family-heading` via `main.css`.
-- Fonts load from Google Fonts with `display=swap` and preconnect hints.
+- Fonts currently load from Google Fonts with `display=swap` and preconnect hints.
 - The current theme config exposes four raw text fields: body family name, body URL segment, heading family name, heading URL segment. This is the main usability problem to solve in Phase 2.
+- **Decision (Sprint 0): self-host the bundled fonts.** The default site must not request Google Fonts. Google Fonts remains available as a legacy/advanced `fontSource` option.
 
 ### 3.2 Print defaults (current)
 
-| Role | Family | Loaded? |
-|---|---|---|
-| Body | IBM Plex Sans | Yes, in `page-print.hbs` |
-| Headings | Syne | Yes, in `page-print.hbs` |
-| Code | Source Code Pro | **No** — it falls back to monospace; fix or document in Phase 2 |
+| Role | Family | Loaded? | Target |
+|---|---|---|---|
+| Body | IBM Plex Sans | Yes, in `page-print.hbs` | Bundled woff2 |
+| Headings | Syne | Yes, in `page-print.hbs` | Bundled woff2 |
+| Code | Source Code Pro | **No** — falls back to monospace | Bundle the regular/bold woff2, or document monospace |
 
 The zine template uses `11pt` body, `1.3` line-height, `8pt` captions/folios, and `8pt` code. Keep these defaults for visual parity.
 
-### 3.3 Planned font presets (Phase 2)
+### 3.3 Font presets and sources (Phase 2)
 
-A single `fontPairing` select will cover the common cases, with a `custom` option that preserves the current four fields:
+`fontSource` controls where fonts come from:
+
+| `fontSource` | Behavior | Use |
+|---|---|---|
+| `bundled` (default) | Local `@font-face` from `assets/fonts/`, no network | Workshops, offline printing, privacy |
+| `google` | Legacy Google Fonts links from the four raw fields | Existing sites with custom Google fonts |
+| `system` | System UI/monospace stacks | Fastest, zero payload |
+| `custom` | User CSS `@font-face` in `customCSS` | Advanced/self-managed fonts |
+
+Bundled `fontPairing` presets:
 
 | Preset | Body | Headings | Character |
 |---|---|---|---|
 | `current` | Inter | Libre Baskerville | Current Mirla look (default) |
-| `editorial` | Source Sans 3 | Source Serif 4 | Long-form DH publications |
-| `modern` | Inter | Space Grotesk | Contemporary exhibitions |
-| `mono` | IBM Plex Sans | IBM Plex Mono | Technical / archival |
-| `system` | System UI stack | System UI stack | Fast, offline, no Google Fonts |
-| `custom` | User-provided | User-provided | Advanced users |
+| `print` | IBM Plex Sans | Syne | Editorial/print companion |
+| `system` | System UI stack | System UI stack | Offline, no font payload |
+| `custom` | User CSS | User CSS | Advanced users |
+
+Every bundled font needs:
+
+- a `woff2` file (prefer `latin` + `latin-ext` subsets, since the collections are Spanish/Portuguese);
+- an `@font-face` rule in `assets/css/fonts.css` with `font-display: swap`, `font-style`, `font-weight`, and `unicode-range`;
+- a license file under `assets/fonts/licenses/` (SIL OFL) and an entry in the README/release notes.
 
 The theme will:
 
 - generate a proper font stack with quoted family names and a generic fallback;
-- load one combined Google Fonts URL per preset (fewer requests than the current two links);
+- remove the default Google Fonts preconnect/link tags;
 - expose `fontSize`, `lineHeight`, and a heading scale;
-- allow a `customCSS` field for `@font-face` / self-hosted fonts;
-- use the same typography settings in print where appropriate, with separate print overrides for page size and margins.
+- allow a `customCSS` field for extra `@font-face` declarations;
+- use bundled fonts in print as well (print pages do not load the main `style.css`, so the print partial must link `fonts.css` or repeat the needed `@font-face` rules).
 
 Font licenses: Inter, Libre Baskerville, IBM Plex Sans, Syne, and Source Code Pro are SIL Open Font License. Keep attribution in the release notes/README.
 
@@ -396,19 +410,31 @@ Extract the common print setup from `page-print.hbs` into a shared partial (plan
 
 Both the zine template and the catalog template include the same base. Catalog-specific CSS lives in `assets/css/catalog.css` (or a dedicated `<style>` block) and only adds catalog layout.
 
-### 9.2 Catalog tokens (planned)
+### 9.2 Catalog tokens and defaults (confirmed)
 
 | Token | Default | Use |
 |---|---|---|
-| `--catalog-columns` | `2` | Grid columns per sheet |
-| `--catalog-gap` | `6mm` | Gap between cards |
-| `--catalog-card-padding` | `3mm` | Card inner padding |
-| `--catalog-image-height` | `45mm` | Image box height |
-| `--catalog-title-size` | `10pt` | Item label |
-| `--catalog-meta-size` | `7.5pt` | Metadata |
-| `--catalog-rule` | `0.5pt solid #000` | Card rules |
-| `--catalog-image-fit` | `contain` | Image fitting |
-| `--catalog-image-filter` | `grayscale(100%) brightness(120%) contrast(120%)` | Print treatment |
+| `--mirla-catalog-columns` | `2` | Grid columns per sheet |
+| `--mirla-catalog-gap` | `6mm` | Gap between cards |
+| `--mirla-catalog-card-padding` | `3mm` | Card inner padding |
+| `--mirla-catalog-image-height` | `45mm` | Image box height |
+| `--mirla-catalog-title-size` | `10pt` | Item label |
+| `--mirla-catalog-meta-size` | `7.5pt` | Metadata |
+| `--mirla-catalog-rule` | `0.5pt solid #000` | Card rules |
+| `--mirla-catalog-image-fit` | `contain` | Image fitting |
+| `--mirla-catalog-image-filter` | `grayscale(100%) brightness(120%) contrast(120%)` | Print treatment |
+
+Content defaults (plugin settings):
+
+- Fields: `label,autores,fecha,medio_impresion`; if none exist in the protocol, fall back to the first four non-media attributes after `label`.
+- Sort: `label`, ascending.
+- Columns: `2`.
+- Items per page: `6`.
+- Image source: main image (not the 400px thumbnail).
+- Image treatment: grayscale.
+- Metadata labels: visible.
+- Scope: main-table items only in v1.
+- Page size: reuse the print page size (default 5.5×8.1in).
 
 The plugin provides layout classes (`catalog--cols-1/2/3`, `catalog--images-color/grayscale`) rather than inline CSS. The theme CSS owns the visual values.
 
@@ -469,10 +495,16 @@ The dev harness is a development tool, not a test artifact. It can live at `svel
 
 ---
 
-## 13. Open design decisions
+## 13. Design decisions
 
-1. **Font presets**: final list and whether to self-host any fonts (offline workshops). Proposed: Google presets + system + custom; self-hosting later.
-2. **Color customization**: keep Pico color versions only, or add a custom primary color picker? Proposed: add optional `primaryColor`/`primaryHoverColor` color pickers that override Pico tokens, with a warning about contrast.
-3. **Catalog layout defaults**: page size (reuse zine 5.5×8.1in?), columns (2), items per page (6), metadata fields (`autores`, `fecha`, `medio_impresion`), image source (main image, not thumb).
-4. **Spacing scale**: keep the legacy-compatible scale for parity, or snap to a 4px grid in a later dedicated visual pass? Proposed: legacy-compatible now, cleanup later.
+Resolved:
+
+1. **Fonts:** self-hosted bundled fonts are the default; Google Fonts is a legacy/advanced source. See §3.3.
+2. **Catalog defaults:** 2 columns, 6 items/page, fields `label,autores,fecha,medio_impresion`, main images, grayscale, `label` ascending, main-table items only. See §9.2.
+3. **Spacing scale:** keep the legacy-compatible scale for parity; snap to a 4px grid in a later dedicated visual pass.
+
+Still open:
+
+4. **Color customization**: keep Pico color versions only, or add a custom primary color picker? Proposed: add optional `primaryColor`/`primaryHoverColor` color pickers that override Pico tokens, with a warning about contrast.
 5. **Data editor visual refresh**: strictly parity first, or allow small density/contrast improvements during the port? Proposed: parity first; improvements in a follow-up.
+6. **Bundled font set**: start with Inter, Libre Baskerville, IBM Plex Sans, Syne, and Source Code Pro. Add more only when a real workshop need appears.
