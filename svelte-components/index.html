@@ -1,12 +1,115 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Web Component Development for Mirla</title>
+    <title>Mirla Component Harness</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <script>
+      window.__harnessErrors = [];
+      function reportHarnessError(message) {
+        window.__harnessErrors.push(String(message));
+        const panel = document.getElementById('harness-errors');
+        if (panel) panel.textContent = window.__harnessErrors.join('\n\n');
+      }
+      window.addEventListener('error', (event) => reportHarnessError(event.error?.stack || event.message));
+      window.addEventListener('unhandledrejection', (event) => reportHarnessError(event.reason?.stack || event.reason));
+    </script>
   </head>
   <body>
-    <!-- <dh-nutshell message="Cómic"></dh-nutshell>
-    <script type="module" src="/src/components/nutshell/index.js"></script> -->
+    <main class="container">
+      <header class="harness-header">
+        <div>
+          <h1>Mirla Component Harness</h1>
+          <p>
+            Development only. Renders every custom element against a synthetic
+            collection. Not part of the production bundle.
+          </p>
+        </div>
+        <label class="harness-theme">
+          <input type="checkbox" id="theme-toggle" role="switch" />
+          Light mode
+        </label>
+      </header>
+
+      <section class="harness-section">
+        <h2>Index</h2>
+        <mirla-index filters="place,type"></mirla-index>
+      </section>
+
+      <section class="harness-section">
+        <h2>Index — secondary table</h2>
+        <mirla-index type="Tecnica"></mirla-index>
+      </section>
+
+      <section class="harness-section">
+        <h2>Table</h2>
+        <mirla-table title="Harness metadata" excludedkeys="latlong"></mirla-table>
+      </section>
+
+      <section class="harness-section">
+        <h2>Protocol</h2>
+        <mirla-protocol title="Harness protocol"></mirla-protocol>
+      </section>
+
+      <section class="harness-section">
+        <h2>Gallery</h2>
+        <mirla-gallery key="place" value="Bogotá" limit="4"></mirla-gallery>
+      </section>
+
+      <section class="harness-section">
+        <h2>Preview</h2>
+        <mirla-preview pid="a" title="A synthetic item"></mirla-preview>
+      </section>
+
+      <section class="harness-section">
+        <h2>Compare</h2>
+        <mirla-compare pid1="a" label1="Layer one" label2="Layer two"></mirla-compare>
+      </section>
+
+      <section class="harness-section">
+        <h2>Bar chart</h2>
+        <mirla-barchart key="place" top="6"></mirla-barchart>
+      </section>
+
+      <section class="harness-section">
+        <h2>Waffle</h2>
+        <mirla-waffle key="type"></mirla-waffle>
+      </section>
+
+      <section class="harness-section">
+        <h2>Timeline</h2>
+        <mirla-timeline datekey="year"></mirla-timeline>
+      </section>
+
+      <section class="harness-section">
+        <h2>Tree</h2>
+        <mirla-tree keys="place,type"></mirla-tree>
+      </section>
+
+      <section class="harness-section">
+        <h2>Network</h2>
+        <mirla-network sourcekey="place" targetkey="type"></mirla-network>
+      </section>
+
+      <section class="harness-section">
+        <h2>Map</h2>
+        <mirla-map coordkey="latlong"></mirla-map>
+      </section>
+
+      <section class="harness-section">
+        <h2>Empty and error states</h2>
+        <mirla-gallery key="place" value="Atlantis"></mirla-gallery>
+        <mirla-gallery></mirla-gallery>
+        <mirla-preview pid="missing"></mirla-preview>
+        <mirla-waffle key="missing"></mirla-waffle>
+      </section>
+    </main>
+
+    <pre id="harness-errors" class="harness-errors"></pre>
+    <script type="module" src="/src/dev/main.js"></script>
   </body>
 </html>

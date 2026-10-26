@@ -66,7 +66,64 @@
   /* --main-width: 1100px;
   --sidebar-width: 300px; */
   
-  --mirla-border: color-mix(in srgb, var(--pico-color) 20%, transparent);
+  /* --- MIRLA SEMANTIC TOKENS ---
+     These are the only tokens component CSS should depend on directly.
+     Values intentionally preserve the current look; they map to Pico where
+     possible so light/dark mode and color versions keep working. */
+  --mirla-text: var(--pico-color, inherit);
+  --mirla-text-muted: var(--pico-muted-color, #777);
+  --mirla-heading: var(--pico-heading-color, inherit);
+  --mirla-primary: var(--pico-primary, #3498db);
+  --mirla-primary-hover: var(--pico-primary-hover, #2980b9);
+  --mirla-on-primary: var(--pico-primary-inverse, #fff);
+  --mirla-surface: var(--pico-card-background-color, #f8f9fa);
+  --mirla-surface-muted: var(--pico-card-sectioning-background-color, rgba(0, 0, 0, 0.05));
+  --mirla-border-color: color-mix(in srgb, var(--pico-color) 20%, transparent);
+  --mirla-border-subtle: color-mix(in srgb, var(--pico-color) 12%, transparent);
+  --mirla-border-form: var(--pico-form-element-border-color, rgba(0, 0, 0, 0.1));
+  --mirla-border: var(--mirla-border-color);
+  --mirla-focus-ring: var(--sl-focus-ring-color, rgba(52, 152, 219, 0.2));
+  --mirla-shadow-focus: 0 0 0 calc(var(--pico-outline-width, 3px) / 2) var(--mirla-focus-ring);
+  --mirla-danger: var(--pico-del-color, #d81b60);
+  --mirla-shadow: var(--pico-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+  --mirla-shadow-card: var(--pico-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.05));
+  --mirla-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+  --mirla-font-body: var(--pico-font-family, inherit);
+  --mirla-font-heading: var(--pico-font-family-heading, inherit);
+
+  --mirla-radius-sm: 4px;
+  --mirla-radius-md: var(--pico-border-radius, 8px);
+  --mirla-radius-lg: 12px;
+  --mirla-radius-pill: 50px;
+
+  --mirla-space-3xs: 0.2rem;
+  --mirla-space-2xs: 0.25rem;
+  --mirla-space-xs: 0.3rem;
+  --mirla-space-sm: 0.4rem;
+  --mirla-space-md: 0.5rem;
+  --mirla-space-lg: 0.6rem;
+  --mirla-space-xl: 0.8rem;
+  --mirla-space-2xl: 1rem;
+  --mirla-space-3xl: 1.2rem;
+  --mirla-space-4xl: 1.5rem;
+  --mirla-space-5xl: 2rem;
+  --mirla-space-6xl: 2.5rem;
+  --mirla-space-7xl: 3rem;
+
+  --mirla-fs-2xs: 0.65rem;
+  --mirla-fs-xs: 0.75rem;
+  --mirla-fs-sm: 0.85rem;
+  --mirla-fs-base: 0.9rem;
+  --mirla-fs-md: 1rem;
+  --mirla-fs-lg: 1.2rem;
+  --mirla-fs-xl: 1.5rem;
+
+  --mirla-duration-fast: 0.2s;
+  --mirla-duration-base: 0.3s;
+  --mirla-duration-slow: 0.5s;
+  --mirla-ease-standard: ease;
+  --mirla-ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Shoelace's style cohesion */

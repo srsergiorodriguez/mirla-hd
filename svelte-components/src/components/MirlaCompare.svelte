@@ -1,33 +1,33 @@
 <svelte:options customElement="mirla-compare" />
 
 <script>
-  let { 
-    pid1 = "", 
-    pid2 = "", 
-    label1 = "Layer 1", 
-    label2 = "Layer 2" 
+  import { getCollection, getItemByPid, getItemImage } from '$lib/data.js';
+  import ErrorState from '$lib/ui/ErrorState.svelte';
+
+  let {
+    pid1 = '',
+    pid2 = '',
+    label1 = 'Layer 1',
+    label2 = 'Layer 2'
   } = $props();
 
-  const collectionData = window.MIRLA_COLLECTION_DATA || { items: [] };
+  const collectionData = getCollection();
   const items = collectionData.items;
 
-  // Resolve Image 1 (Force String matching for safety)
   let resolvedImg1 = $derived.by(() => {
     if (!pid1) return null;
-    const item = items.find(d => String(d.pid) === String(pid1));
-    if (item && item.images && item.images.length > 0) return item.images[0];
-    return null;
+    return getItemImage(getItemByPid(items, pid1), 0);
   });
 
-  // Resolve Image 2
   let resolvedImg2 = $derived.by(() => {
     if (pid2) {
-      const item = items.find(d => String(d.pid) === String(pid2));
-      if (item && item.images && item.images.length > 0) return item.images[0];
-    } else if (pid1) {
-      const item = items.find(d => String(d.pid) === String(pid1));
-      if (item && item.images && item.images.length > 1) return item.images[1];
+      return getItemImage(getItemByPid(items, pid2), 0);
     }
+
+    if (pid1) {
+      return getItemImage(getItemByPid(items, pid1), 1);
+    }
+
     return null;
   });
 
@@ -39,11 +39,11 @@
     <figure class="compare-figure">
       <img class="img-base" src={resolvedImg2} alt={label2} />
 
-      <img 
-        class="img-clip" 
-        src={resolvedImg1} 
-        alt={label1} 
-        style="clip-path: inset(0 {100 - sliderValue}% 0 0);" 
+      <img
+        class="img-clip"
+        src={resolvedImg1}
+        alt={label1}
+        style="clip-path: inset(0 {100 - sliderValue}% 0 0);"
       />
 
       <div class="slider-ui" style="left: {sliderValue}%;">
@@ -61,54 +61,52 @@
       <div class="label label-left" style="opacity: {sliderValue > 15 ? 1 : 0};">{label1}</div>
       <div class="label label-right" style="opacity: {sliderValue < 85 ? 1 : 0};">{label2}</div>
 
-      <input 
-        type="range" 
-        min="0" 
-        max="100" 
-        bind:value={sliderValue} 
-        class="compare-range" 
+      <input
+        type="range"
+        min="0"
+        max="100"
+        bind:value={sliderValue}
+        class="compare-range"
         aria-label="Compare images slider"
       />
     </figure>
   {:else}
-    <div class="mirla-error">
+    <ErrorState>
       PROVIDE 'PID1' (ITEM MUST HAVE 2 IMAGES) OR PROVIDE BOTH 'PID1' AND 'PID2'.
-    </div>
+    </ErrorState>
   {/if}
 </div>
 
 <style>
   .mirla-compare-container {
     width: 100%;
-    /* Centers the shrink-wrapped figure */
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 2em auto;
-    font-family: var(--pico-font-family, inherit);
+    margin: var(--mirla-space-5xl, 2em) auto;
+    font-family: var(--mirla-font-body, var(--pico-font-family, inherit));
   }
 
   .compare-figure {
     position: relative;
-    /* Shrink-wraps the container so the slider matches the image bounds perfectly */
     width: fit-content;
     max-width: 100%;
     margin: 0;
     padding: 0;
-    border-radius: var(--pico-border-radius, 8px);
+    border-radius: var(--mirla-radius-md, var(--pico-border-radius, 8px));
     overflow: hidden;
     background: var(--pico-muted-border-color, #eee);
-    border: 1px solid var(--pico-form-element-border-color, rgba(0,0,0,0.1));
-    line-height: 0; 
+    border: 1px solid var(--mirla-border-form, var(--pico-form-element-border-color, rgba(0, 0, 0, 0.1)));
+    line-height: 0;
   }
 
-  .img-base, .img-clip {
+  .img-base,
+  .img-clip {
     display: block;
-    pointer-events: none; 
+    pointer-events: none;
   }
 
   .img-base {
-    /* Enforces the max height while keeping the native aspect ratio */
     max-width: 100%;
     max-height: 500px;
     width: auto;
@@ -119,13 +117,11 @@
     position: absolute;
     top: 0;
     left: 0;
-    /* Forces the top image to exactly map onto the footprint of the base image */
     width: 100%;
     height: 100%;
-    object-fit: fill; 
+    object-fit: fill;
   }
 
-  /* Slider UI overlay */
   .slider-ui {
     position: absolute;
     top: 0;
@@ -144,7 +140,7 @@
     width: 2px;
     transform: translateX(-50%);
     background: white;
-    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
   }
 
   .slider-thumb {
@@ -154,17 +150,16 @@
     transform: translate(-50%, -50%);
     width: 36px;
     height: 36px;
-    background: var(--pico-primary, #4a90e2);
-    color: var(--pico-primary-inverse, white);
+    background: var(--mirla-primary, var(--pico-primary, #4a90e2));
+    color: var(--mirla-on-primary, var(--pico-primary-inverse, white));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     border: 2px solid white;
   }
 
-  /* Informational Labels */
   .label {
     position: absolute;
     top: 10px;
@@ -173,18 +168,22 @@
     color: white;
     font-size: 0.8rem;
     font-weight: bold;
-    border-radius: var(--pico-border-radius, 4px);
+    border-radius: var(--mirla-radius-sm, var(--pico-border-radius, 4px));
     z-index: 4;
-    transition: opacity 0.2s;
+    transition: opacity var(--mirla-duration-fast, 0.2s);
     line-height: 1.2;
     pointer-events: none;
     backdrop-filter: blur(2px);
   }
 
-  .label-left { left: 10px; }
-  .label-right { right: 10px; }
+  .label-left {
+    left: 10px;
+  }
 
-  /* Native Range Input (Invisible) */
+  .label-right {
+    right: 10px;
+  }
+
   .compare-range {
     position: absolute;
     top: 0;
@@ -196,15 +195,5 @@
     opacity: 0;
     cursor: col-resize;
     z-index: 10;
-  }
-
-  .mirla-error {
-    padding: 1em;
-    border: 1px dashed var(--pico-del-color, red);
-    color: var(--pico-del-color, red);
-    font-family: monospace;
-    font-weight: bold;
-    text-align: center;
-    border-radius: var(--pico-border-radius, 8px);
   }
 </style>
