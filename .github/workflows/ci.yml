@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - agent-dev
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Tests and builds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install component dependencies
+        working-directory: svelte-components
+        run: npm ci
+
+      - name: Fast checks
+        run: scripts/test-all.sh
+
+      - name: Build Svelte components into the theme
+        run: scripts/build-all.sh
+
+      - name: Verify the committed component bundle is up to date
+        run: git diff --exit-code -- input/themes/mirlaTheme/assets/js/mirla-components.js
+
+      - name: Check for uncommitted build output
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "The build produced uncommitted changes:"
+            git status --short
+            echo "Commit the generated artifact or fix the build so it is reproducible."
+            exit 1
+          fi
+
+      - name: Install data editor dependencies
+        if: ${{ hashFiles('data-editor/package.json') != '' }}
+        working-directory: data-editor
+        run: npm ci
+
+      - name: Test data editor
+        if: ${{ hashFiles('data-editor/package.json') != '' }}
+        working-directory: data-editor
+        run: npm test --if-present
+
+      - name: Build data editor
+        if: ${{ hashFiles('data-editor/package.json') != '' }}
+        working-directory: data-editor
+        run: npm run build
+
+      - name: Verify the data editor is a single self-contained HTML file
+        if: ${{ hashFiles('data-editor/package.json') != '' }}
+        run: |
+          EDITOR_HTML="data-editor/dist/MirlaDataEditor.html"
+          if [[ ! -f "$EDITOR_HTML" ]]; then
+            echo "Expected editor build not found: $EDITOR_HTML"
+            exit 1
+          fi
+          if grep -Eq '<script[^>]+src=|<link[^>]+href="https?://' "$EDITOR_HTML"; then
+            echo "Editor build still references external scripts/styles."
+            exit 1
+          fi
+          echo "Editor build is self-contained."
