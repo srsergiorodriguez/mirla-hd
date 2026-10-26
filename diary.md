@@ -301,6 +301,6 @@ Paged.js leaves the link alone, the browser still loads the fonts, and the inlin
 - The source template now has the attribute; Publii will emit it on the next preview.
 - `scripts/test-theme-variables.js` rejects a print template where the fonts.css link is not ignored.
 
-**Still pending**
-- User confirmation that the real Publii preview renders again.
-- Sprint 2 push remains paused.
+**Confirmed**
+- User reloaded the print preview: it renders again.
+- Sprint 2 complete; pushing after approval.

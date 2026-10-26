@@ -1,6 +1,6 @@
 # Mirla Plan — Active Sprint
 
-> Branch: `agent-dev`. Status: **Sprint 2 implemented; Publii preview pending**.
+> Branch: `agent-dev`. Status: **Sprint 2 complete and verified; Sprint 3 next**.
 > Last updated: 2026-10-26.
 
 The work is split into sequential sprints. Only the sprint marked **ACTIVE** is implemented at a time. Do not start the next sprint until the current acceptance criteria are met and `diary.md` is updated.
@@ -9,9 +9,9 @@ The work is split into sequential sprints. Only the sprint marked **ACTIVE** is 
 
 ## Sprint status
 
-**Completed:** Sprint 0 (foundations, plugin dev loop), Sprint 1 (design system, parity refactor), and Sprint 2 implementation (self-hosted fonts, colors, print settings).
+**Completed:** Sprint 0 (foundations, plugin dev loop), Sprint 1 (design system, parity refactor), and Sprint 2 (self-hosted fonts, colors, print settings).
 
-**Next:** confirm Sprint 2 in Publii, then Sprint 3 (print catalog).
+**Next:** Sprint 3 (print catalog).
 
 
 ### Sprint 0 — Foundations, docs, and the plugin dev loop
@@ -119,6 +119,7 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 
 **Notes:**
 
+- A Paged.js white-screen bug was found and fixed during this sprint: the print page's external `fonts.css` link must carry `data-pagedjs-ignore`, otherwise Paged.js fetches it, rejects on `file://`, and aborts pagination.
 - The browser's custom elements use Shadow DOM. Theme tokens inherit; document-level selectors do not. This was previously undocumented and is now captured in `design-system.md` and `architecture.md`.
 - `MirlaWaffle` cell clicks now set the active category correctly (the previous implementation only set `selectedItems` and left the reset/dimming state inactive).
 - The ItemsBar close button appears not to remove the bar in headless tests; the same behavior exists in the old bundle and is likely the `fade` transition not completing under virtual time. Verify in a real browser before treating it as a regression.
@@ -129,7 +130,7 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 
 ## Sprint 2 — Versatile customization
 
-**Status:** implemented; waiting for a real Publii preview.
+**Status:** complete and verified in Publii (including the print white-screen fix).
 
 **Goal:** make the common workshop customizations possible from Publii settings, without editing code.
 
@@ -161,7 +162,7 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 - [x] Add print body/heading/code font options using the bundled fonts (defaults: IBM Plex Sans, Syne, Source Code Pro).
 - [x] Load Source Code Pro from the bundled fonts.
 - [x] Add print image treatment (grayscale default, color option).
-- [x] Keep the current zine output identical with defaults (confirmed by a mock Paged.js render: 4 pages, local fonts).
+- [x] Keep the current zine output identical with defaults (confirmed by a mock Paged.js render and a real Publii preview).
 - [ ] Extract the shared print base into a partial when adding the catalog (Sprint 3); the current print CSS stays inline for parity.
 
 ### 2.4 Docs
@@ -218,7 +219,8 @@ Sprint 4 can run in parallel with 1–3 because it is a separate app. The recomm
 - [ ] Add `page-catalog.hbs` and register `"catalog": "Printable Catalog Template"` in `config.json`.
 - [ ] Add `assets/js/catalog.js`: wait for fonts + images, then start Paged.js.
 - [ ] Add catalog print CSS (grid, cards, rules, folios, running headers, image treatment).
-- [ ] Reuse the shared print base from Sprint 2.
+- [ ] Reuse the Sprint 2 print settings (page size, margins, fonts, image treatment) and extract the shared print base if the catalog needs it.
+- [ ] Link `fonts.css` with `data-pagedjs-ignore` (Paged.js must not fetch it).
 - [ ] Add an editor placeholder style for `[MIRLA_CATALOG]` if useful.
 - [ ] Add a documentation page/section: create page → select template → write cover/intro → insert placeholder → publish → print to PDF.
 - [ ] Verify no change to `page-print.hbs` output.
